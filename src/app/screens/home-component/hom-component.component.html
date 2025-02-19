@@ -1,13 +1,23 @@
-<div class="wrapper">
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="side" opened="false">
+    <p>Contenido del menú lateral</p>
+    <button mat-button (click)="sidenav.close()">Cerrar</button>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
     <div class="Menu">
-      <div class="log-out">
-        <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="home"></mat-icon>
+      <mat-icon class="slide-bar" (click)="sidenav.toggle()">horizontal_split</mat-icon>
+      <div class="button-container">
+        <button mat-button>Basic</button>
+        <button mat-button>Basic</button>
+        <button mat-button>Basic</button>
+        <button mat-button>Basic</button>
+        <button mat-button>Basic</button>
       </div>
+      <mat-icon class="home-icon">home</mat-icon>
     </div>
-
     <div class="main-container">
-    <p>primera parte de la pagina</p>
+      <H2>Pagina de inicio</H2>
     </div>
-
-</div>
-
+  </mat-sidenav-content>
+</mat-sidenav-container>
