@@ -1,3 +1,31 @@
-.menu {
-  flex: 1 1 auto;
+.wrapper{
+  display: flex;
+  flex-direction: column;
 }
+
+.Menu{
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(248, 255, 154);
+  height: 8vh;
+}
+
+.log-out{
+  padding-top: 1.5cap;
+  margin-left: 127cap;
+  mat-icon{
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    font-size: 28px;
+  }
+}
+
+.main-container{
+  display: flex;
+  flex-direction: column;
+  color: rgb(0, 0, 0);
+  background-color: rgb(170, 242, 255);
+  height: 100vh;
+  width: 100%;
+}
+
