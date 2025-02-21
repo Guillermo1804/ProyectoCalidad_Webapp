@@ -3,6 +3,8 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSidenav, MatSidenavModule} from '@angular/material/sidenav';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-hom-component',
@@ -20,7 +22,18 @@ import {MatSidenav, MatSidenavModule} from '@angular/material/sidenav';
 export class HomComponentComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
+  ngOnini(){}
+
+  constructor(
+    private router: Router,
+  ){}
+
   toggleSidenav() {
     this.sidenav.toggle();
   }
+
+
+public goBack(){
+  this.router.navigate(["login"]);
+}
 }
