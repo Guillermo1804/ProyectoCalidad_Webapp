@@ -1,1 +1,17 @@
-<p>login-component works!</p>
+<div class="login-container">
+  <div class="login-card">
+    <h2>Iniciar sesión</h2>
+    <form>
+      <div class="input-group">
+        <input type="text" id="username" required>
+        <label for="username">Usuario</label>
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" required>
+        <label for="password">Contraseña</label>
+      </div>
+      <button type="submit" (click)="login()">Ingresar</button>
+      <p class="register-link">¿No tienes cuenta? <a href="#">Regístrate</a></p>
+    </form>
+  </div>
+</div>

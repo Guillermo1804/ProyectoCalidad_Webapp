@@ -8,4 +8,12 @@ import { Component } from '@angular/core';
 })
 export class LoginComponentComponent {
 
+constructor(
+
+){}
+
+ngOnInit(
+){}
+
+public login(){}
 }
