@@ -1,6 +1,6 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError, of } from 'rxjs';
+import { Observable, catchError, throwError, of, BehaviorSubject } from 'rxjs';
 import * as Papa from 'papaparse';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -19,6 +19,8 @@ interface CsvRow {
 export class CsvService {
   private isBrowser: boolean;
   private readonly baseUrl: string = '/';
+  private dataSubject = new BehaviorSubject<CsvRow[]>([]);
+  private isLoading = false;
 
   constructor(
     private http: HttpClient,
@@ -33,61 +35,60 @@ export class CsvService {
       return this.getDatosDemostracion();
     }
 
+    // Si ya estamos cargando, retornamos el observable actual
+    if (this.isLoading) {
+      return this.dataSubject.asObservable();
+    }
+
+    this.isLoading = true;
     const fullUrl = this.resolveUrl(url);
     console.log('Iniciando carga de CSV desde:', fullUrl);
 
-    return new Observable((observer) => {
-      this.http.get(fullUrl, { 
-        responseType: 'text',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      }).pipe(
-          catchError((error: HttpErrorResponse) => {
-            console.error('Error en la petición HTTP:', error);
-            console.error('Status:', error.status);
-            console.error('URL completa:', fullUrl);
-            console.error('Mensaje de error:', error.message);
-            return throwError(() => error);
-          })
-        )
-        .subscribe({
-          next: (data) => {
-            console.log('Datos recibidos, longitud:', data.length);
-            try {
-              Papa.parse<CsvRow>(data, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (result) => {
-                  console.log('Parsing completado. Filas:', result.data.length);
-                  if (result.data.length > 0) {
-                    const firstRow = result.data[0];
-                    console.log('Muestra de primera fila:', firstRow);
-                    if (firstRow && typeof firstRow === 'object') {
-                      console.log('Columnas detectadas:', Object.keys(firstRow));
-                    }
-                  }
-                  observer.next(result.data);
-                  observer.complete();
-                },
-                error: (error: Error) => {
-                  console.error('Error en el parsing:', error);
-                  observer.error(error);
-                }
-              });
-            } catch (e) {
-              console.error('Error intentando parsear CSV:', e);
-              observer.error(e);
+    this.http.get(fullUrl, { 
+      responseType: 'text',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error en la petición HTTP:', error);
+        this.isLoading = false;
+        return throwError(() => error);
+      })
+    ).subscribe({
+      next: (data) => {
+        try {
+          const results: CsvRow[] = [];
+          Papa.parse(data, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (result) => {
+              console.log('Parsing completado');
+              this.dataSubject.next(result.data as CsvRow[]);
+              this.isLoading = false;
+            },
+            error: (error: Error) => {
+              console.error('Error en el parsing:', error);
+              this.isLoading = false;
+              this.dataSubject.error(error);
             }
-          },
-          error: (err) => {
-            console.error('Error en la subscripción:', err);
-            observer.error(err);
-          }
-        });
+          });
+        } catch (e) {
+          console.error('Error intentando parsear CSV:', e);
+          this.isLoading = false;
+          this.dataSubject.error(e);
+        }
+      },
+      error: (err) => {
+        console.error('Error en la subscripción:', err);
+        this.isLoading = false;
+        this.dataSubject.error(err);
+      }
     });
+
+    return this.dataSubject.asObservable();
   }
 
   private resolveUrl(url: string): string {
@@ -122,7 +123,7 @@ export class CsvService {
       }
     ];
     
-    console.log('Utilizando datos de demostración como respaldo');
-    return of(datosDemostracion);
+    this.dataSubject.next(datosDemostracion);
+    return this.dataSubject.asObservable();
   }
 }

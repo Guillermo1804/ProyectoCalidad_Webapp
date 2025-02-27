@@ -1,4 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body { 
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    contain: content;
+    overscroll-behavior: none;
+}
+
+.cdk-virtual-scroll-content-wrapper {
+    transform: translateZ(0);
+    will-change: transform;
+    contain: content;
+}
+
+.mat-row {
+    contain: layout style;
+}
+
+.mat-table {
+    transform: translateZ(0);
+    will-change: transform;
+    contain: content;
+}
+
+.mat-cell {
+    contain: layout style;
+}

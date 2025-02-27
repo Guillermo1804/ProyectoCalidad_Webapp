@@ -2,6 +2,8 @@
     <button mat-icon-button (click)="toggleSidenav()">
       <mat-icon>menu</mat-icon>
     </button>
+    <span>AccesCtr</span>
+    <span class="spacer"></span>
     <button mat-icon-button (click)="goBack()">
       <mat-icon>exit_to_app</mat-icon>
     </button>
@@ -29,17 +31,34 @@
     <div class="main-content">
       <h2>Lista de Estudiantes</h2>
       
+      <!-- Campo de búsqueda -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Buscar</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Buscar estudiante..." #input>
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
       <!-- Tabla de datos -->
       <div class="mat-table-container">
-        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="dataSource.length > 0">
+        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
           <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
-            <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
             <td mat-cell *matCellDef="let element">{{ element[column] }}</td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <!-- Fila para cuando no hay datos -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="5">No se encontraron datos que coincidan con el filtro "{{input.value}}"</td>
+          </tr>
         </table>
+
+        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"
+                       aria-label="Seleccionar página de estudiantes"
+                       showFirstLastButtons>
+        </mat-paginator>
       </div>
 
       <div *ngIf="isLoading" class="loading">

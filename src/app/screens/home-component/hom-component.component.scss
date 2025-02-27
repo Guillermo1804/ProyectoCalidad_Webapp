@@ -1,9 +1,9 @@
-.wrapper{
+.wrapper {
   display: flex;
   flex-direction: column;
 }
 
-.Menu{
+.Menu {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -12,7 +12,7 @@
   width: 100%;
 }
 
-.slide-bar{
+.slide-bar {
   order: 1;
   cursor: pointer;
   font-size: 30px;
@@ -27,13 +27,14 @@
   flex-grow: 1;
   gap: 10px;
   margin: 0 20px;
+
+  button {
+    margin: 40px;
+    color: white;
+  }
 }
 
-.button-container button{
-  margin: 40px;
-}
-
-.home-icon{
+.home-icon {
   order: 3;
   cursor: pointer;
   font-size: 30px;
@@ -44,12 +45,12 @@
 
 .sidenav-container {
   height: calc(100vh - 64px);
-}
 
-mat-sidenav {
-  width: 250px;
-  padding: 10px;
-  background-color: #f4f4f4;
+  mat-sidenav {
+    width: 250px;
+    padding: 10px;
+    background-color: #f4f4f4;
+  }
 }
 
 .spacer {
@@ -61,16 +62,61 @@ mat-sidenav {
   height: 100%;
 }
 
-.mat-table-container {
+.filter-field {
   width: 100%;
-  overflow-x: auto;
-  margin: 20px 0;
+  max-width: 500px;
+  margin: 0 auto 20px;
+  display: block;
 }
 
-table {
+.mat-table-container {
   width: 100%;
-  min-width: 800px;
-  margin: 20px auto;
+  overflow: auto;
+  margin: 20px 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  contain: content;
+  will-change: transform;
+
+  table {
+    width: 100%;
+    min-width: 800px;
+    margin: 20px auto;
+    background: white;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+.mat-header-cell {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 16px;
+  font-size: 14px;
+  background-color: #f5f5f5;
+
+  &:first-child {
+    padding-left: 24px;
+  }
+}
+
+.mat-cell {
+  padding: 16px;
+  font-size: 14px;
+
+  &:first-child {
+    padding-left: 24px;
+  }
+}
+
+.mat-row {
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+.mat-paginator {
+  border-top: 1px solid rgba(0,0,0,0.12);
 }
 
 .loading {
@@ -91,28 +137,9 @@ table {
   max-width: 80%;
 }
 
-.mat-elevation-z8 {
-  box-shadow: 0 5px 5px -3px rgba(0,0,0,.2),
-              0 8px 10px 1px rgba(0,0,0,.14),
-              0 3px 14px 2px rgba(0,0,0,.12);
-}
-
-th.mat-header-cell {
-  font-weight: bold;
-  color: rgba(0, 0, 0, 0.87);
-  background-color: #f5f5f5;
+.no-data-row {
   padding: 16px;
-}
-
-td.mat-cell {
-  padding: 16px;
-}
-
-tr.mat-row:hover {
-  background-color: #f5f5f5;
-}
-
-button {
-  color: white;
+  text-align: center;
+  color: rgba(0,0,0,0.54);
 }
 
