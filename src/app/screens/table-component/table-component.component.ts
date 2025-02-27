@@ -1,9 +1,4 @@
-import { Component, ViewChild, OnInit, PLATFORM_ID, Inject } from '@angular/core';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSidenav, MatSidenavModule} from '@angular/material/sidenav';
-import { Router } from '@angular/router';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CsvService } from '../../services/csv.service';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -20,23 +15,13 @@ interface CsvRow {
 }
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './hom-component.component.html',
-  styleUrls: ['./hom-component.component.scss'],
+  selector: 'app-table',
+  templateUrl: './table-component.component.html',
+  styleUrls: ['./table-component.component.scss'],
   standalone: true,
-  imports: [
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatTableModule,
-    MatProgressSpinnerModule,
-    CommonModule
-  ]
+  imports: [MatTableModule, MatProgressSpinnerModule, CommonModule]
 })
-export class HomComponentComponent implements OnInit {
-  @ViewChild('sidenav') sidenav!: MatSidenav;
-
+export class TableComponent implements OnInit {
   displayedColumns: string[] = ['Matricula', 'Apellido Paterno', 'Apellido Materno', 'Nombre', 'Email'];
   dataSource: CsvRow[] = [];
   errorMessage: string = '';
@@ -44,7 +29,6 @@ export class HomComponentComponent implements OnInit {
   isBrowser: boolean;
 
   constructor(
-    private router: Router,
     private csvService: CsvService,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
@@ -59,14 +43,6 @@ export class HomComponentComponent implements OnInit {
       console.log('Ejecutando en SSR, usando datos de demostración');
       this.useDemoData();
     }
-  }
-
-  toggleSidenav() {
-    this.sidenav.toggle();
-  }
-
-  public goBack(){
-    this.router.navigate(["login"]);
   }
 
   tryLoadCSV(): void {

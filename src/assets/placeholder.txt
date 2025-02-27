@@ -1,0 +1,2 @@
+// Este archivo se dejará vacío inicialmente y será reemplazado por el contenido del archivo CSV real.
+// Servirá como marcador para garantizar que la carpeta assets existe.

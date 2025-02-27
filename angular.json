@@ -29,6 +29,21 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "Datos",
+                "output": "Datos"
+              },
+              {
+                "glob": "**/*.csv",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -94,6 +109,21 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "Datos",
+                "output": "Datos"
+              },
+              {
+                "glob": "**/*.csv",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
