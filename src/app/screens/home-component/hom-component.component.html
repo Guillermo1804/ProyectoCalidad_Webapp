@@ -1,17 +1,7 @@
-<mat-toolbar color="primary">
-    <button mat-icon-button (click)="toggleSidenav()">
-      <mat-icon>menu</mat-icon>
-    </button>
-    <span>AccesCtr</span>
-    <span class="spacer"></span>
-    <button mat-icon-button (click)="goBack()">
-      <mat-icon>exit_to_app</mat-icon>
-    </button>
-</mat-toolbar>
-
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #sidenav mode="side" opened="false">
     <p>Contenido del menú lateral</p>
+    <button mat-button (click)="clearCache()">Limpiar caché</button>
     <button mat-button (click)="sidenav.close()">Cerrar</button>
   </mat-sidenav>
 
@@ -19,26 +9,17 @@
     <div class="Menu">
       <mat-icon class="slide-bar" (click)="sidenav.toggle()">horizontal_split</mat-icon>
       <div class="button-container">
-        <button mat-button>Basic</button>
-        <button mat-button>Basic</button>
-        <button mat-button>Basic</button>
-        <button mat-button>Basic</button>
-        <button mat-button>Basic</button>
+        <span class="student-count" *ngIf="totalStudents">Total: {{totalStudents}}</span>
+        <mat-form-field appearance="outline" class="search-field">
+          <input matInput (keyup)="applyFilter($event)" placeholder="Buscar estudiante..." #input>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
       </div>
       <mat-icon class="home-icon" (click)="goBack()">home</mat-icon>
     </div>
 
     <div class="main-content">
-      <h2>Lista de Estudiantes</h2>
-      
-      <!-- Campo de búsqueda -->
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Buscar</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Buscar estudiante..." #input>
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-
-      <!-- Tabla de datos -->
+      <!-- Tabla de datos sin virtualización para mejor compatibilidad con paginación dinámica -->
       <div class="mat-table-container">
         <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
           <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
@@ -55,9 +36,10 @@
           </tr>
         </table>
 
-        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"
-                       aria-label="Seleccionar página de estudiantes"
-                       showFirstLastButtons>
+        <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
+                     [pageSize]="10"
+                     aria-label="Seleccionar página de estudiantes"
+                     showFirstLastButtons>
         </mat-paginator>
       </div>
 

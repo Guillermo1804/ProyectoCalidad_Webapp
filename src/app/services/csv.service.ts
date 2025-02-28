@@ -1,7 +1,8 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError, of, BehaviorSubject } from 'rxjs';
+import { Observable, catchError, throwError, of, BehaviorSubject, map } from 'rxjs';
 import * as Papa from 'papaparse';
+import { ParseResult } from 'papaparse';
 import { isPlatformBrowser } from '@angular/common';
 
 interface CsvRow {
@@ -10,7 +11,7 @@ interface CsvRow {
   'Apellido Materno': string;
   Nombre: string;
   Email: string;
-  [key: string]: string; // Para cualquier columna adicional
+  [key: string]: string;
 }
 
 @Injectable({
@@ -21,6 +22,7 @@ export class CsvService {
   private readonly baseUrl: string = '/';
   private dataSubject = new BehaviorSubject<CsvRow[]>([]);
   private isLoading = false;
+  private readonly CHUNK_SIZE = 1000;
 
   constructor(
     private http: HttpClient,
@@ -31,7 +33,6 @@ export class CsvService {
 
   cargarCSV(url: string): Observable<CsvRow[]> {
     if (!this.isBrowser) {
-      console.log('Ejecutando en el servidor, retornando datos de demostración');
       return this.getDatosDemostracion();
     }
 
@@ -42,7 +43,6 @@ export class CsvService {
 
     this.isLoading = true;
     const fullUrl = this.resolveUrl(url);
-    console.log('Iniciando carga de CSV desde:', fullUrl);
 
     this.http.get(fullUrl, { 
       responseType: 'text',
@@ -53,20 +53,27 @@ export class CsvService {
       }
     }).pipe(
       catchError((error: HttpErrorResponse) => {
-        console.error('Error en la petición HTTP:', error);
         this.isLoading = false;
         return throwError(() => error);
       })
     ).subscribe({
-      next: (data) => {
+      next: (csvText: string) => {
         try {
-          const results: CsvRow[] = [];
-          Papa.parse(data, {
+          const allData: CsvRow[] = [];
+          Papa.parse<CsvRow>(csvText, {
             header: true,
             skipEmptyLines: true,
-            complete: (result) => {
-              console.log('Parsing completado');
-              this.dataSubject.next(result.data as CsvRow[]);
+            chunk: (result: ParseResult<CsvRow>) => {
+              if (result.data && result.data.length > 0) {
+                allData.push(...result.data);
+                // Emitir actualizaciones parciales
+                if (allData.length % this.CHUNK_SIZE === 0) {
+                  this.dataSubject.next([...allData]);
+                }
+              }
+            },
+            complete: () => {
+              this.dataSubject.next(allData);
               this.isLoading = false;
             },
             error: (error: Error) => {
@@ -123,7 +130,6 @@ export class CsvService {
       }
     ];
     
-    this.dataSubject.next(datosDemostracion);
-    return this.dataSubject.asObservable();
+    return of(datosDemostracion);
   }
 }

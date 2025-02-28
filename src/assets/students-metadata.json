@@ -1,0 +1,12 @@
+{
+  "total": 26000,
+  "chunks": 260,
+  "chunkSize": 100,
+  "fields": [
+    "Matricula",
+    "Apellido Paterno",
+    "Apellido Materno",
+    "Nombre",
+    "Email"
+  ]
+}

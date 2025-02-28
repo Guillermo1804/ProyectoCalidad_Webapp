@@ -9,6 +9,7 @@ export function app(): express.Express {
   const server = express();
   const serverDistFolder = dirname(fileURLToPath(import.meta.url));
   const browserDistFolder = resolve(serverDistFolder, '../browser');
+  const assetsFolder = resolve(serverDistFolder, '../src/assets');
   const indexHtml = join(browserDistFolder, 'index.html');
 
   server.set('view engine', 'html');
@@ -16,6 +17,11 @@ export function app(): express.Express {
 
   // Serve static files from /browser
   server.get('*.*', express.static(browserDistFolder, {
+    maxAge: '1y'
+  }));
+
+  // Serve JSON files from /assets
+  server.get('/assets/*.json', express.static(assetsFolder, {
     maxAge: '1y'
   }));
 
