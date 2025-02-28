@@ -23,5 +23,9 @@ public login(){
   this.router.navigate(["home"]);
 }
 
+irARegistro() {
+  this.router.navigate(['/registro']);
+}
+
 }
 

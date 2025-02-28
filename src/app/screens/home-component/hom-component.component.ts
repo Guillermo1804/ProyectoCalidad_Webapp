@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
-import { CsvService } from '../../services/csv.service';
+//import { CsvService } from '../../services/csv.service';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -57,7 +57,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
 
   constructor(
     private router: Router,
-    private csvService: CsvService,
+    //private csvService: CsvService,
     private paginatorIntl: MatPaginatorIntl,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
@@ -78,7 +78,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
       }
       length = Math.max(length, 0);
       const startIndex = page * pageSize;
-      const endIndex = startIndex < length ? 
+      const endIndex = startIndex < length ?
         Math.min(startIndex + pageSize, length) : startIndex + pageSize;
       return `${startIndex + 1} - ${endIndex} de ${length}`;
     };
@@ -91,7 +91,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
       this.initializeVirtualScrolling();
     } else {
       console.log('Ejecutando en SSR, usando datos de demostración');
-      this.useDemoData();
+      //this.useDemoData();
     }
   }
 
@@ -102,7 +102,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     // Configurar el filtrado personalizado
     this.dataSource.filterPredicate = (data: CsvRow, filter: string) => {
       const searchStr = filter.toLowerCase();
-      return Object.values(data).some(value => 
+      return Object.values(data).some(value =>
         value.toString().toLowerCase().includes(searchStr)
       );
     };
@@ -139,14 +139,14 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   loadCSVFromUrl(urls: string[], index: number): void {
     if (index >= urls.length) {
       console.warn("No se pudo cargar el CSV desde ninguna ruta, usando datos de demostración");
-      this.useDemoData();
+      //this.useDemoData();
       this.errorMessage = "No se pudo cargar el archivo CSV original. Se muestran datos de demostración.";
       return;
     }
 
+    /*
     const url = urls[index];
     console.log(`Intentando cargar CSV desde: ${url}`);
-    
     this.csvService.cargarCSV(url).subscribe({
       next: (data: CsvRow[]) => {
         if (data && data.length > 0) {
@@ -164,8 +164,10 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
         this.loadCSVFromUrl(urls, index + 1);
       }
     });
+    */
   }
 
+  /*
   useDemoData(): void {
     this.csvService.getDatosDemostracion().subscribe({
       next: (demoData: CsvRow[]) => {
@@ -175,7 +177,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
+*/
   private initializeVirtualScrolling() {
     this.dataSource.paginator = this.paginator;
     if (this.paginator) {

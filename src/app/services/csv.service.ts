@@ -1,3 +1,5 @@
+/*
+
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError, of, BehaviorSubject } from 'rxjs';
@@ -16,6 +18,7 @@ interface CsvRow {
 @Injectable({
   providedIn: 'root',
 })
+
 export class CsvService {
   private isBrowser: boolean;
   private readonly baseUrl: string = '/';
@@ -44,7 +47,7 @@ export class CsvService {
     const fullUrl = this.resolveUrl(url);
     console.log('Iniciando carga de CSV desde:', fullUrl);
 
-    this.http.get(fullUrl, { 
+    this.http.get(fullUrl, {
       responseType: 'text',
       headers: {
         'Cache-Control': 'no-cache',
@@ -100,7 +103,7 @@ export class CsvService {
 
   getDatosDemostracion(): Observable<CsvRow[]> {
     const datosDemostracion: CsvRow[] = [
-      { 
+      {
         Matricula: '202240506',
         'Apellido Paterno': 'HERNANDEZ',
         'Apellido Materno': 'CRUZ',
@@ -122,8 +125,10 @@ export class CsvService {
         Email: 'ejemplo3@correo.com'
       }
     ];
-    
+
     this.dataSubject.next(datosDemostracion);
     return this.dataSubject.asObservable();
   }
 }
+
+*/
