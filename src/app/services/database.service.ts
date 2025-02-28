@@ -20,6 +20,11 @@ export interface StudentData {
   [key: string]: string;
 }
 
+export interface SortOptions {
+  active: string;  // Columna activa para ordenar
+  direction: 'asc' | 'desc' | '';  // Dirección de la ordenación
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -122,9 +127,9 @@ export class DatabaseService {
   }
 
   /**
-   * Obtiene estudiantes paginados
+   * Obtiene estudiantes paginados con soporte para ordenación
    */
-  getStudents(page: number, pageSize: number): Observable<StudentData[]> {
+  getStudents(page: number, pageSize: number, sortOptions?: SortOptions): Observable<StudentData[]> {
     if (!this.isBrowser) {
       // En SSR, retornamos una matriz vacía; los datos se cargarán en el cliente
       return of([]);
@@ -151,10 +156,10 @@ export class DatabaseService {
         
         if (chunksToLoad.length > 0) {
           return from(Promise.all(chunksToLoad)).pipe(
-            switchMap(() => this.getStudentRange(startIndex, endIndex))
+            switchMap(() => this.getStudentRange(startIndex, endIndex, sortOptions))
           );
         } else {
-          return this.getStudentRange(startIndex, endIndex);
+          return this.getStudentRange(startIndex, endIndex, sortOptions);
         }
       }),
       catchError(error => {
@@ -166,15 +171,36 @@ export class DatabaseService {
   }
 
   /**
-   * Obtiene un rango de estudiantes desde IndexedDB
+   * Verifica si un registro de estudiante tiene datos completos
    */
-  private getStudentRange(startIndex: number, endIndex: number): Observable<StudentData[]> {
+  private hasCompleteData(student: StudentData): boolean {
+    // Verificar que al menos tenga un nombre y apellido paterno
+    return !!(student.Nombre && student['Apellido Paterno'] && student.Matricula);
+  }
+
+  /**
+   * Filtra registros de estudiantes sin datos completos
+   */
+  private filterIncompleteRecords(students: StudentData[]): StudentData[] {
+    return students.filter(student => this.hasCompleteData(student));
+  }
+
+  /**
+   * Obtiene un rango de estudiantes desde IndexedDB con soporte para ordenación
+   */
+  private getStudentRange(startIndex: number, endIndex: number, sortOptions?: SortOptions): Observable<StudentData[]> {
     if (!this.isBrowser || !this.metadata) {
       return of([]);
     }
     
     return from(this.initDatabase()).pipe(
       switchMap(() => {
+        // Si hay una ordenación activa, necesitamos cargar todos los chunks para ordenarlos correctamente
+        if (sortOptions && sortOptions.active && sortOptions.direction) {
+          return this.getAllStudentsWithSort(sortOptions, startIndex, endIndex - startIndex);
+        }
+
+        // Si no hay ordenación, procedemos con la carga normal de chunks
         const chunksNeeded = new Set<number>();
         for (let i = startIndex; i < endIndex; i++) {
           const chunkId = Math.floor(i / this.metadata!.chunkSize) + this.chunkOffset;
@@ -187,9 +213,12 @@ export class DatabaseService {
         return from(Promise.all(getChunksPromises)).pipe(
           map(chunks => {
             // Combinar todos los chunks y extraer el rango solicitado
-            const allStudents = chunks.reduce((acc: StudentData[], chunk: any) => {
+            let allStudents = chunks.reduce((acc: StudentData[], chunk: any) => {
               return acc.concat(chunk.data);
             }, []);
+            
+            // Filtrar registros incompletos
+            allStudents = this.filterIncompleteRecords(allStudents);
             
             // Calcular las posiciones relativas dentro de los chunks combinados
             const relativeStart = startIndex % this.metadata!.chunkSize;
@@ -202,6 +231,98 @@ export class DatabaseService {
         return of([]);
       })
     );
+  }
+
+  /**
+   * Obtiene y ordena todos los estudiantes, luego devuelve un subconjunto paginado
+   */
+  private getAllStudentsWithSort(sortOptions: SortOptions, startIndex: number, count: number): Observable<StudentData[]> {
+    if (!this.isBrowser || !this.metadata) {
+      return of([]);
+    }
+
+    // Cargar todos los chunks si es necesario para ordenar todos los datos
+    const chunksToLoad: Promise<void>[] = [];
+    for (let i = 0; i < this.metadata.chunks; i++) {
+      const adjustedChunkId = i + this.chunkOffset;
+      if (!this.loadedChunks.has(adjustedChunkId)) {
+        chunksToLoad.push(this.loadChunk(adjustedChunkId));
+      }
+    }
+
+    return from(Promise.all(chunksToLoad)).pipe(
+      switchMap(() => {
+        return new Promise<StudentData[]>((resolve, reject) => {
+          if (!this.db) {
+            reject(new Error('Base de datos no inicializada'));
+            return;
+          }
+
+          const allStudents: StudentData[] = [];
+          const transaction = this.db.transaction(['students'], 'readonly');
+          const store = transaction.objectStore('students');
+          
+          const request = store.openCursor();
+          request.onsuccess = (event: any) => {
+            const cursor = event.target.result;
+            if (cursor) {
+              allStudents.push(...cursor.value.data);
+              cursor.continue();
+            } else {
+              // Filtrar registros incompletos antes de ordenar
+              const filteredStudents = this.filterIncompleteRecords(allStudents);
+              
+              // Ordenar todos los estudiantes
+              const sortedStudents = this.sortStudents(filteredStudents, sortOptions);
+              
+              // Devolver solo el rango solicitado
+              resolve(sortedStudents.slice(startIndex, startIndex + count));
+            }
+          };
+          
+          request.onerror = (event) => {
+            console.error('Error cargando todos los estudiantes:', event);
+            reject(new Error('Error cargando estudiantes para ordenar'));
+          };
+        });
+      }),
+      catchError(error => {
+        console.error('Error ordenando estudiantes:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Ordena un array de estudiantes según las opciones especificadas
+   */
+  private sortStudents(students: StudentData[], sortOptions: SortOptions): StudentData[] {
+    if (!sortOptions.active || !sortOptions.direction) {
+      return students;
+    }
+
+    return [...students].sort((a, b) => {
+      // Obtener los valores a comparar
+      const valueA = a[sortOptions.active] ? String(a[sortOptions.active]).toLowerCase() : '';
+      const valueB = b[sortOptions.active] ? String(b[sortOptions.active]).toLowerCase() : '';
+      
+      // Comparación de valores
+      let comparison = 0;
+      
+      // Primero intentamos comparar como números
+      const numA = Number(valueA);
+      const numB = Number(valueB);
+      
+      if (!isNaN(numA) && !isNaN(numB)) {
+        comparison = numA - numB;
+      } else {
+        // Si no son números válidos, comparamos como texto
+        comparison = valueA.localeCompare(valueB, 'es', { sensitivity: 'base' });
+      }
+      
+      // Aplicar dirección de ordenación
+      return sortOptions.direction === 'asc' ? comparison : -comparison;
+    });
   }
 
   /**
@@ -463,7 +584,8 @@ export class DatabaseService {
                 });
               });
               
-              results.push(...matchingStudents);
+              // Solo agregar estudiantes con datos completos
+              results.push(...this.filterIncompleteRecords(matchingStudents));
               cursor.continue();
             } else {
               resolve(results);

@@ -233,6 +233,46 @@ mat-paginator {
   padding: 20px;
   border-radius: 8px;
   z-index: 1000;
+  
+  p {
+    margin-top: 10px;
+    font-weight: 500;
+  }
+}
+
+// Indicador de ordenación global
+.sort-indicator {
+  background-color: #e5f2ff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin: 8px 16px 0;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #0066FF;
+  border: 1px solid rgba(0, 102, 255, 0.3);
+  
+  .sort-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }
+}
+
+// Indicador de ordenación en encabezados
+.sort-active-indicator {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-left: 4px;
+  
+  &.asc {
+    color: #0066FF;
+  }
+  
+  &.desc {
+    color: #ff4500;
+  }
 }
 
 .error-message {

@@ -8,11 +8,11 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatPaginator, MatPaginatorModule, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { DatabaseService, StudentData } from '../../services/database.service';
+import { DatabaseService, StudentData, SortOptions } from '../../services/database.service';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
@@ -57,6 +57,10 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   isUserMenuOpen: boolean = false;
   userDisplayName: string | null = null;
   userEmail: string | null = null;
+
+  // Opciones de ordenación actuales
+  currentSortOptions: SortOptions | undefined;
+  isSorting: boolean = false;
 
   constructor(
     private router: Router,
@@ -132,7 +136,10 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     }
     
     if (this.sort) {
-      this.dataSource.sort = this.sort;
+      // Suscribirnos a los cambios de ordenación
+      this.sort.sortChange.subscribe((sort: Sort) => {
+        this.handleSortChange(sort);
+      });
     }
   }
 
@@ -167,13 +174,15 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
 
   loadStudentsFromServer(pageIndex: number, pageSize: number) {
     this.isLoading = true;
+    this.isSorting = this.currentSortOptions !== undefined;
     this.cdr.detectChanges();
     
-    this.dbService.getStudents(pageIndex, pageSize).subscribe({
+    this.dbService.getStudents(pageIndex, pageSize, this.currentSortOptions).subscribe({
       next: (students) => {
         this.ngZone.run(() => {
           this.dataSource.data = students;
           this.isLoading = false;
+          this.isSorting = false;
           this.errorMessage = '';
           this.cdr.detectChanges();
         });
@@ -182,6 +191,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
         console.error('Error cargando estudiantes:', error);
         this.errorMessage = 'Error cargando datos de estudiantes.';
         this.isLoading = false;
+        this.isSorting = false;
         this.cdr.detectChanges();
       }
     });
@@ -280,5 +290,27 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     }
     
     this.cdr.detectChanges();
+  }
+
+  /**
+   * Maneja el cambio en la ordenación
+   */
+  handleSortChange(sort: Sort): void {
+    if (!sort.active || sort.direction === '') {
+      this.currentSortOptions = undefined;
+    } else {
+      this.currentSortOptions = {
+        active: sort.active,
+        direction: sort.direction as 'asc' | 'desc'
+      };
+    }
+    
+    // Volver a la primera página al cambiar la ordenación
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    
+    // Recargar los datos con la nueva ordenación
+    this.loadStudentsPage();
   }
 }
