@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, PLATFORM_ID, Inject, AfterViewInit, ChangeDetectionStrategy, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, OnInit, PLATFORM_ID, Inject, AfterViewInit, ChangeDetectionStrategy, NgZone, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { MatPaginator, MatPaginatorModule, MatPaginatorIntl } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -41,6 +41,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('input') searchInputRef!: ElementRef;
 
   displayedColumns: string[] = ['Matricula', 'Apellido Paterno', 'Apellido Materno', 'Nombre', 'Email'];
   dataSource: MatTableDataSource<StudentData>;
@@ -50,6 +51,12 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   totalStudents = 0;
   currentPageSize = 10; // Tamaño de página por defecto
   private searchTerms = new Subject<string>();
+
+  // Nuevas propiedades para UI
+  isSearchExpanded: boolean = false;
+  isUserMenuOpen: boolean = false;
+  userDisplayName: string | null = null;
+  userEmail: string | null = null;
 
   constructor(
     private router: Router,
@@ -69,6 +76,25 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
       distinctUntilChanged(),
       tap(term => this.performSearch(term))
     ).subscribe();
+
+    // Simular datos de usuario (reemplazar con datos reales del servicio de autenticación)
+    this.loadUserData();
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    // Cerrar el menú de usuario si se hace clic fuera
+    if (this.isUserMenuOpen && !(event.target as HTMLElement).closest('.user-menu-container')) {
+      this.isUserMenuOpen = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private loadUserData() {
+    // Aquí deberías obtener los datos del usuario del servicio de autenticación
+    // Por ahora usamos datos simulados
+    this.userDisplayName = 'Usuario Demo';
+    this.userEmail = 'usuario@ejemplo.com';
   }
 
   private initializePaginatorLabels() {
@@ -136,11 +162,14 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
 
   loadStudentsPage() {
     if (!this.paginator) return;
-    
+    this.loadStudentsFromServer(this.paginator.pageIndex, this.paginator.pageSize);
+  }
+
+  loadStudentsFromServer(pageIndex: number, pageSize: number) {
     this.isLoading = true;
     this.cdr.detectChanges();
     
-    this.dbService.getStudents(this.paginator.pageIndex, this.paginator.pageSize).subscribe({
+    this.dbService.getStudents(pageIndex, pageSize).subscribe({
       next: (students) => {
         this.ngZone.run(() => {
           this.dataSource.data = students;
@@ -196,6 +225,30 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     this.sidenav.toggle();
   }
 
+  // Nuevos métodos para UI
+  toggleSearch() {
+    this.isSearchExpanded = !this.isSearchExpanded;
+    this.cdr.detectChanges();
+    
+    if (this.isSearchExpanded && this.searchInputRef) {
+      // Esperar a que la animación termine para enfocar el input
+      setTimeout(() => {
+        this.searchInputRef.nativeElement.focus();
+      }, 300);
+    }
+  }
+
+  toggleUserMenu() {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+    this.cdr.detectChanges();
+  }
+
+  logout() {
+    // Implementar la lógica de cierre de sesión (llamar al servicio de autenticación)
+    // Por ahora simplemente redirigimos al login
+    this.router.navigate(["login"]);
+  }
+
   public goBack() {
     this.router.navigate(["login"]);
   }
@@ -215,5 +268,17 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // Nuevo método para manejar el evento del paginador
+  onPageChange(event: PageEvent) {
+    this.currentPageSize = event.pageSize;
+    
+    // Solo cargamos nuevos datos si no estamos en modo de filtrado/búsqueda
+    if (this.searchInputRef?.nativeElement.value === '') {
+      this.loadStudentsFromServer(event.pageIndex, event.pageSize);
+    }
+    
+    this.cdr.detectChanges();
   }
 }
