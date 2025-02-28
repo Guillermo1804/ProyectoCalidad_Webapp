@@ -54,7 +54,9 @@
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                (click)="navigateToUserPage(row)" 
+                class="clickable-row"></tr>
 
             <tr class="mat-row" *matNoDataRow>
               <td class="mat-cell" colspan="5">No se encontraron datos que coincidan con el filtro "{{input.value}}"</td>

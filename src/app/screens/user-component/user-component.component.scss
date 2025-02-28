@@ -1,0 +1,402 @@
+// Estilos globales para la página
+.user-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+// Barra de navegación
+.toolbar {
+  background-color: #0066FF;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  .toolbar-title {
+    margin-left: 10px;
+    font-size: 1.2em;
+    font-weight: 500;
+  }
+  
+  .toolbar-spacer {
+    flex: 1 1 auto;
+  }
+}
+
+// Contenido principal
+.content-container {
+  padding: 24px;
+  flex-grow: 1;
+  position: relative;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  
+  > * {
+    margin-bottom: 24px;
+  }
+  
+  &:last-child {
+    margin-bottom: 80px; // Espacio adicional al final
+  }
+}
+
+// Overlay de carga
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  
+  p {
+    margin-top: 16px;
+    font-size: 16px;
+    color: #333;
+  }
+}
+
+// Tarjeta de usuario
+.user-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 102, 0.1);
+  overflow: hidden;
+  
+  mat-card-header {
+    padding: 16px;
+    background-color: #f0f4fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    
+    mat-card-title {
+      font-size: 1.5em;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    mat-card-subtitle {
+      font-size: 1em;
+      color: #666;
+    }
+  }
+  
+  .user-avatar {
+    background-color: #0066FF;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    
+    mat-icon {
+      font-size: 28px;
+      height: 28px;
+      width: 28px;
+    }
+  }
+  
+  .user-details {
+    padding: 8px 16px;
+    
+    p {
+      margin: 8px 0;
+      font-size: 1em;
+      color: #444;
+      
+      strong {
+        font-weight: 500;
+        color: #333;
+      }
+    }
+  }
+}
+
+// Pestañas de vehículos
+.vehicle-tabs {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-height: 500px; // Altura mínima para el contenedor
+  display: flex;
+  flex-direction: column;
+  
+  ::ng-deep {
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    
+    .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      min-height: 400px; // Altura mínima para el contenido
+    }
+    
+    .mat-mdc-tab-body-content {
+      padding: 8px 0;
+      height: auto !important;
+      min-height: 400px;
+      overflow-y: auto;
+    }
+  }
+}
+
+// Contenedor de pestañas
+.tabs-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  margin-bottom: 40px;
+  
+  .vehicle-tabs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    
+    ::ng-deep {
+      .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        display: flex;
+      }
+      
+      .mat-mdc-tab-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        
+        & > .mat-mdc-tab-body-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          padding-bottom: 80px !important;
+        }
+      }
+    }
+  }
+}
+
+// Contenido de las pestañas
+.tab-content {
+  padding: 20px 16px 60px; // Aumentado el padding inferior
+  height: auto;
+  min-height: 100%;
+}
+
+// Título de sección
+.section-title {
+  font-size: 1.2em;
+  font-weight: 500;
+  color: #333;
+  margin: 24px 0 16px;
+  padding-left: 8px;
+  border-left: 4px solid #0066FF;
+}
+
+// Tarjetas para formularios
+.entry-form-card, .vehicle-form-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  mat-card-header {
+    background-color: #f0f4fa;
+    padding: 16px;
+    
+    mat-card-title {
+      font-size: 1.2em;
+      margin-bottom: 0;
+    }
+  }
+  
+  mat-card-content {
+    padding: 16px;
+  }
+}
+
+// Formularios
+.entry-form, .vehicle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    
+    .full-width {
+      flex: 1;
+    }
+    
+    button {
+      align-self: flex-end;
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Lista de vehículos
+.vehicles-list-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  
+  .vehicles-list {
+    padding: 0;
+    
+    .vehicle-list-item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      
+      mat-icon {
+        color: #0066FF;
+        margin-right: 16px;
+      }
+      
+      div[mat-line] {
+        flex: 1;
+      }
+    }
+  }
+  
+  .no-vehicles {
+    padding: 16px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+  }
+}
+
+// Tablas
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  min-height: 100px;
+  margin-top: 16px;
+  background-color: white;
+  
+  table {
+    width: 100%;
+    min-height: 50px;
+    
+    th {
+      background-color: #f5f5f5;
+      color: #333;
+      font-weight: 500;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    
+    .mat-mdc-row:hover {
+      background-color: #f9f9f9;
+    }
+  }
+  
+  .no-data-row {
+    td.mat-cell {
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+      color: #666;
+    }
+  }
+}
+
+// Mensaje de no registros
+.no-records-message {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+// Información de depuración
+.debug-info {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f0f8ff;
+  border-left: 3px solid #0066FF;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+}
+
+// Estilos para los Snackbars (mensajes de éxito/error)
+::ng-deep {
+  .success-snackbar {
+    background-color: #43a047;
+    color: white;
+    
+    .mat-simple-snackbar-action {
+      color: white;
+    }
+  }
+  
+  .error-snackbar {
+    background-color: #d32f2f;
+    color: white;
+    
+    .mat-simple-snackbar-action {
+      color: white;
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 767px) {
+  .content-container {
+    padding: 16px 12px;
+  }
+  
+  .user-card {
+    mat-card-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .mat-card-header-text {
+        margin: 10px 0 0 0;
+      }
+    }
+  }
+  
+  .table-container {
+    margin: 0 -12px;
+    width: calc(100% + 24px);
+    border-radius: 0;
+    
+    table {
+      min-width: 500px;
+    }
+  }
+}
+
+// Footer invisible para asegurar espacio al final
+.invisible-footer {
+  height: 120px;
+  width: 100%;
+  visibility: hidden;
+  pointer-events: none;
+}

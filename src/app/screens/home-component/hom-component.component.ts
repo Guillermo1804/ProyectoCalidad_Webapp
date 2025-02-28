@@ -313,4 +313,16 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     // Recargar los datos con la nueva ordenación
     this.loadStudentsPage();
   }
+
+  /**
+   * Navega a la página de detalle del usuario cuando se hace clic en una fila
+   */
+  navigateToUserPage(student: StudentData): void {
+    if (student && student.Matricula) {
+      // Navegamos a la ruta /user/:matricula
+      this.router.navigate(['/user', student.Matricula], {
+        state: { userData: student } // Pasamos los datos del estudiante como estado
+      });
+    }
+  }
 }

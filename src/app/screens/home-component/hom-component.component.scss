@@ -313,3 +313,12 @@ mat-paginator {
   }
 }
 
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 102, 255, 0.05);
+  }
+}
+

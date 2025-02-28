@@ -1,0 +1,215 @@
+<div class="user-page-container">
+  <!-- Barra de navegación superior -->
+  <mat-toolbar color="primary" class="toolbar">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">Perfil de Estudiante</span>
+    <span class="toolbar-spacer"></span>
+  </mat-toolbar>
+
+  <!-- Contenido principal -->
+  <div class="content-container">
+    <div class="loading-overlay" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando datos...</p>
+    </div>
+
+    <!-- Tarjeta de información del estudiante -->
+    <mat-card class="user-card" *ngIf="userData">
+      <mat-card-header>
+        <div mat-card-avatar class="user-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <mat-card-title>
+          {{ userData['Nombre'] }} {{ userData['Apellido Paterno'] }} {{ userData['Apellido Materno'] }}
+        </mat-card-title>
+        <mat-card-subtitle>
+          Matrícula: {{ userData['Matricula'] }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="user-details">
+          <p><strong>Email:</strong> {{ userData['Email'] }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Pestañas para la gestión de vehículos -->
+    <div class="tabs-container">
+      <mat-tab-group class="vehicle-tabs" animationDuration="300ms">
+        <!-- Pestaña de registro de entrada/salida -->
+        <mat-tab label="Registro de Entrada/Salida">
+          <div class="tab-content">
+            <!-- Formulario de registro de entrada -->
+            <mat-card class="entry-form-card">
+              <mat-card-header>
+                <mat-card-title>Registrar Entrada de Vehículo</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="entry-form">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Seleccionar Placa</mat-label>
+                    <mat-select [(ngModel)]="selectedLicensePlate">
+                      <mat-option *ngFor="let plate of userVehicleInfo?.licensePlates" [value]="plate">
+                        {{ plate }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" (click)="registerVehicleEntry()" [disabled]="!selectedLicensePlate">
+                    <mat-icon>login</mat-icon>
+                    Registrar Entrada
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Tabla de vehículos activos (dentro del campus) -->
+            <h2 class="section-title">Vehículos Actualmente en Campus</h2>
+            <div class="table-container">
+              <table mat-table [dataSource]="activeVehicleRecords" class="active-records-table mat-elevation-z2">
+                <!-- Columna de Placa -->
+                <ng-container matColumnDef="licensePlate">
+                  <th mat-header-cell *matHeaderCellDef>Placa</th>
+                  <td mat-cell *matCellDef="let record">{{ record.licensePlate }}</td>
+                </ng-container>
+
+                <!-- Columna de Hora de Entrada -->
+                <ng-container matColumnDef="entryTime">
+                  <th mat-header-cell *matHeaderCellDef>Hora de Entrada</th>
+                  <td mat-cell *matCellDef="let record">{{ formatDateTime(record.entryTime) }}</td>
+                </ng-container>
+
+                <!-- Columna de Acciones -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let record">
+                    <button mat-icon-button color="accent" (click)="registerVehicleExit(record.id)" matTooltip="Registrar Salida">
+                      <mat-icon>logout</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <!-- Definición de filas -->
+                <tr mat-header-row *matHeaderRowDef="activeRecordsColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: activeRecordsColumns;"></tr>
+              </table>
+
+              <!-- Mensaje cuando no hay registros - fuera de la tabla para mejor visualización -->
+              <div *ngIf="activeVehicleRecords.length === 0" class="no-records-message">
+                No hay vehículos activos en el campus
+              </div>
+            </div>
+
+            <!-- Debug: Mostrar datos de registros activos -->
+            <div *ngIf="activeVehicleRecords.length > 0" class="debug-info">
+              <p>Registros activos encontrados: {{ activeVehicleRecords.length }}</p>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Pestaña de gestión de vehículos -->
+        <mat-tab label="Mis Vehículos">
+          <div class="tab-content">
+            <!-- Formulario para agregar nuevo vehículo -->
+            <mat-card class="vehicle-form-card">
+              <mat-card-header>
+                <mat-card-title>Agregar Nuevo Vehículo</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="vehicle-form">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Placa del Vehículo</mat-label>
+                    <input matInput [(ngModel)]="newLicensePlate" placeholder="Ej: ABC-123" maxlength="10">
+                    <mat-hint>Ingrese el número de placa del vehículo</mat-hint>
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" (click)="registerNewVehicle()" [disabled]="!newLicensePlate">
+                    <mat-icon>add_circle</mat-icon>
+                    Agregar Vehículo
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Lista de vehículos registrados -->
+            <h2 class="section-title">Mis Vehículos Registrados</h2>
+            <mat-card class="vehicles-list-card">
+              <mat-card-content>
+                <mat-list class="vehicles-list">
+                  <div *ngIf="userVehicleInfo?.licensePlates?.length === 0" class="no-vehicles">
+                    No hay vehículos registrados
+                  </div>
+                  <mat-list-item *ngFor="let plate of userVehicleInfo?.licensePlates">
+                    <div class="vehicle-list-item">
+                      <mat-icon mat-list-icon>directions_car</mat-icon>
+                      <div mat-line>{{ plate }}</div>
+                      <button mat-icon-button color="warn" (click)="removeVehicle(plate)" matTooltip="Eliminar Vehículo">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </mat-list-item>
+                </mat-list>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <!-- Pestaña de historial -->
+        <mat-tab label="Historial">
+          <div class="tab-content">
+            <h2 class="section-title">Historial de Entradas y Salidas</h2>
+            <div class="table-container">
+              <table mat-table [dataSource]="historicalRecords" class="historical-records-table">
+                <!-- Columna de Placa -->
+                <ng-container matColumnDef="licensePlate">
+                  <th mat-header-cell *matHeaderCellDef>Placa</th>
+                  <td mat-cell *matCellDef="let record">{{ record.licensePlate }}</td>
+                </ng-container>
+
+                <!-- Columna de Fecha -->
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                  <td mat-cell *matCellDef="let record">{{ record.date | date:'dd/MM/yyyy' }}</td>
+                </ng-container>
+
+                <!-- Columna de Hora de Entrada -->
+                <ng-container matColumnDef="entryTime">
+                  <th mat-header-cell *matHeaderCellDef>Entrada</th>
+                  <td mat-cell *matCellDef="let record">{{ formatDateTime(record.entryTime) }}</td>
+                </ng-container>
+
+                <!-- Columna de Hora de Salida -->
+                <ng-container matColumnDef="exitTime">
+                  <th mat-header-cell *matHeaderCellDef>Salida</th>
+                  <td mat-cell *matCellDef="let record">
+                    {{ record.exitTime ? formatDateTime(record.exitTime) : 'Sin registrar' }}
+                  </td>
+                </ng-container>
+
+                <!-- Columna de Duración -->
+                <ng-container matColumnDef="duration">
+                  <th mat-header-cell *matHeaderCellDef>Duración</th>
+                  <td mat-cell *matCellDef="let record">
+                    {{ calculateDuration(record.entryTime, record.exitTime) }}
+                  </td>
+                </ng-container>
+
+                <!-- Definición de filas -->
+                <tr mat-header-row *matHeaderRowDef="historicalRecordsColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: historicalRecordsColumns;"></tr>
+
+                <!-- Mensaje cuando no hay registros -->
+                <tr class="mat-row no-data-row" *matNoDataRow>
+                  <td class="mat-cell" [attr.colspan]="historicalRecordsColumns.length">
+                    No hay registros históricos
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    <div class="invisible-footer"></div>
+  </div>
+</div>
