@@ -1,3 +1,4 @@
+import { RegistrarEntradaComponentComponent } from './screens/registrar-entrada-component/registrar-entrada-component.component';
 import { RegisterComponentComponent } from './screens/register-component/register-component.component';
 import { HomComponentComponent } from './screens/home-component/hom-component.component';
 import { Routes } from '@angular/router';
@@ -8,5 +9,6 @@ export const routes: Routes = [
   { path: 'home', component: HomComponentComponent },
   { path: 'login', component: LoginComponentComponent },
   //{ path: '**', redirectTo: 'home' },
-  { path: 'registro', component: RegisterComponentComponent }
+  { path: 'registro', component: RegisterComponentComponent },
+  { path: 'registrar-entrada', component: RegistrarEntradaComponentComponent }
 ];
