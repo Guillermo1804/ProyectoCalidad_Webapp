@@ -1,20 +1,25 @@
-import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+// Importaciones corregidas de Angular Material
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatOptionModule } from '@angular/material/core';
+
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableDataSource } from '@angular/material/table';
+import { lastValueFrom } from 'rxjs';
 
 import { StudentData } from '../../services/database.service';
 import { VehicleService, VehicleRecord, UserVehicleInfo } from '../../services/vehicle/vehicle.service';
@@ -22,137 +27,93 @@ import { VehicleService, VehicleRecord, UserVehicleInfo } from '../../services/v
 @Component({
   selector: 'app-user-component',
   standalone: true,
+  templateUrl: './user-component.component.html',
+  styleUrls: ['./user-component.component.scss'],
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
+    MatToolbarModule,
+    MatIconModule,
     MatCardModule,
     MatTabsModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule, 
-    MatIconModule,
-    MatTableModule,
     MatSelectModule,
-    MatDividerModule,
-    MatSnackBarModule,
-    MatToolbarModule,
     MatListModule,
+    MatTableModule,
+    MatButtonModule,
+    MatInputModule,
+    MatSnackBarModule,
     MatProgressSpinnerModule,
-    DatePipe
+    MatOptionModule,
+    DatePipe,
   ],
-  providers: [
-    VehicleService
-  ],
-  templateUrl: './user-component.component.html',
-  styleUrls: ['./user-component.component.scss']
+  providers: [DatePipe]
 })
 export class UserComponentComponent implements OnInit {
-  // Datos del estudiante
   userData: StudentData | null = null;
   matricula: string = '';
-  
-  // Registro de vehículos
-  activeVehicleRecords: VehicleRecord[] = [];
-  historicalRecords: VehicleRecord[] = [];
+  activeVehicleRecords = new MatTableDataSource<VehicleRecord>();
+  historicalRecords = new MatTableDataSource<VehicleRecord>();
   userVehicleInfo: UserVehicleInfo | null = null;
-  
-  // Columnas para la tabla de registros activos
-  activeRecordsColumns: string[] = ['licensePlate', 'entryTime', 'actions'];
-  
-  // Columnas para la tabla de registros históricos
-  historicalRecordsColumns: string[] = ['licensePlate', 'date', 'entryTime', 'exitTime', 'duration'];
-  
-  // Formulario para nuevo vehículo
+
+  activeRecordsColumns: string[] = ['license_plate', 'entry_time', 'actions'];
+  historicalRecordsColumns: string[] = ['license_plate', 'date', 'entry_time', 'exit_time', 'duration'];
+
   newLicensePlate: string = '';
   selectedLicensePlate: string = '';
-  
-  // Estado de la interfaz
   loading: boolean = false;
-  
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private vehicleService: VehicleService,
     private snackBar: MatSnackBar,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private datePipe: DatePipe
   ) {}
-  
+
   ngOnInit() {
-    // Obtener la matrícula del usuario de la URL
     this.route.paramMap.subscribe(params => {
       const matricula = params.get('matricula');
       if (!matricula) {
         this.router.navigate(['/home']);
         return;
       }
-      
       this.matricula = matricula;
-      
-      // Verificar si estamos en el navegador antes de acceder a window
-      const isBrowser = isPlatformBrowser(this.platformId);
-      
-      if (isBrowser) {
-        // Si estamos en el navegador, intentar obtener datos del state
-        const navigationState = window.history.state;
-        
-        if (navigationState && navigationState.userData) {
-          this.userData = navigationState.userData;
-          console.log('Datos del usuario cargados desde state:', this.userData);
-        } else {
-          this.setDefaultUserData();
-        }
-      } else {
-        // Si estamos en el servidor, usar datos por defecto
-        this.setDefaultUserData();
-      }
-      
-      // Cargar datos de vehículos del usuario
+      this.loadUserData();
       this.loadVehicleData();
     });
   }
-  
-  /**
-   * Establece datos de usuario por defecto cuando no hay datos disponibles
-   */
-  private setDefaultUserData() {
-    console.log('No se encontraron datos en state, usando datos básicos');
-    this.userData = {
-      Matricula: this.matricula,
-      'Apellido Paterno': 'Apellido',
-      'Apellido Materno': 'Materno',
-      Nombre: 'Nombre',
-      Email: `${this.matricula}@ejemplo.com`
+
+  private loadUserData() {
+    const state = this.router.getCurrentNavigation()?.extras.state;
+    this.userData = state?.['userData'] || this.createDefaultUserData();
+  }
+
+  private createDefaultUserData(): StudentData {
+    return {
+      matricula: this.matricula,
+      apellido_paterno: 'Apellido',
+      apellido_materno: 'Materno',
+      nombre: 'Nombre',
+      email: `${this.matricula}@ejemplo.com`,
+      fecha_registro: new Date().toISOString()
     };
   }
-  
-  /**
-   * Carga los datos de vehículos del usuario
-   */
-  loadVehicleData() {
+
+  async loadVehicleData() {
     this.loading = true;
-    
-    // Verificar si estamos en el navegador
-    const isBrowser = isPlatformBrowser(this.platformId);
-    
-    if (!isBrowser) {
-      // Si estamos en el servidor, establecer datos por defecto y terminar
-      this.activeVehicleRecords = [];
-      this.historicalRecords = [];
-      this.userVehicleInfo = { licensePlates: [] };
-      this.loading = false;
-      return;
-    }
-    
     try {
-      // Solo ejecutar estas operaciones en el navegador
-      // Cargar registros activos (vehículos dentro del campus)
-      this.activeVehicleRecords = this.vehicleService.getActiveUserVehicleRecords(this.matricula);
-      
-      // Cargar registros históricos
-      this.historicalRecords = this.vehicleService.getHistoricalUserVehicleRecords(this.matricula);
-      
-      // Cargar información de vehículos del usuario
-      this.userVehicleInfo = this.vehicleService.getUserVehicleInfo(this.matricula);
+      const [active, historical, info] = await Promise.all([
+        lastValueFrom(this.vehicleService.getActiveUserVehicleRecords(this.matricula)),
+        lastValueFrom(this.vehicleService.getHistoricalUserVehicleRecords(this.matricula)),
+        lastValueFrom(this.vehicleService.getUserVehicleInfo(this.matricula))
+      ]);
+
+      this.activeVehicleRecords.data = active || [];
+      this.historicalRecords.data = historical || [];
+      this.userVehicleInfo = info || { license_plates: [] };
+
     } catch (error) {
       this.showError('Error al cargar los datos de vehículos');
       console.error('Error loading vehicle data:', error);
@@ -160,142 +121,114 @@ export class UserComponentComponent implements OnInit {
       this.loading = false;
     }
   }
-  
-  /**
-   * Registra un nuevo vehículo para el usuario
-   */
-  registerNewVehicle() {
+
+  async registerNewVehicle() {
     if (!this.newLicensePlate.trim()) {
       this.showError('Por favor ingrese una placa válida');
       return;
     }
-    
+
     try {
-      this.vehicleService.associateLicensePlateWithUser(this.matricula, this.newLicensePlate.toUpperCase());
+      await lastValueFrom(
+        this.vehicleService.associateLicensePlateWithUser(
+          this.matricula,
+          this.newLicensePlate.toUpperCase()
+        )
+      );
       this.showSuccess('Vehículo registrado correctamente');
       this.newLicensePlate = '';
-      this.loadVehicleData(); // Recargar datos
+      await this.loadVehicleData();
     } catch (error) {
       this.showError('Error al registrar el vehículo');
       console.error('Error registering vehicle:', error);
     }
   }
-  
-  /**
-   * Elimina un vehículo registrado del usuario
-   */
-  removeVehicle(licensePlate: string) {
-    try {
-      this.vehicleService.removeLicensePlateFromUser(this.matricula, licensePlate);
-      this.showSuccess('Vehículo eliminado correctamente');
-      this.loadVehicleData(); // Recargar datos
-    } catch (error) {
-      this.showError('Error al eliminar el vehículo');
-      console.error('Error removing vehicle:', error);
-    }
-  }
-  
-  /**
-   * Registra la entrada de un vehículo
-   */
-  registerVehicleEntry() {
-    if (!this.selectedLicensePlate) {
-      this.showError('Por favor seleccione una placa');
-      return;
-    }
-    
-    try {
-      this.vehicleService.registerEntry(this.matricula, this.selectedLicensePlate);
-      this.showSuccess('Entrada registrada correctamente');
-      this.selectedLicensePlate = '';
-      this.loadVehicleData(); // Recargar datos
-    } catch (error: any) {
-      this.showError(error.message || 'Error al registrar la entrada');
-      console.error('Error registering entry:', error);
-    }
-  }
-  
-  /**
-   * Registra la salida de un vehículo
-   */
-  registerVehicleExit(recordId: string) {
-    try {
-      this.vehicleService.registerExit(recordId);
-      this.showSuccess('Salida registrada correctamente');
-      this.loadVehicleData(); // Recargar datos
-    } catch (error: any) {
-      this.showError(error.message || 'Error al registrar la salida');
-      console.error('Error registering exit:', error);
-    }
-  }
-  
-  /**
-   * Formatea una fecha ISO a un formato más amigable
-   */
-  formatDateTime(dateTimeStr: string): string {
-    try {
-      const date = new Date(dateTimeStr);
-      return date.toLocaleString('es-MX');
-    } catch (error) {
-      return 'Fecha inválida';
-    }
-  }
-  
-  /**
-   * Calcula la duración entre entrada y salida
-   */
-  calculateDuration(entryTime: string, exitTime?: string): string {
-    if (!exitTime) return 'En curso';
-    
-    const entry = new Date(entryTime).getTime();
-    const exit = new Date(exitTime).getTime();
-    const diffMs = exit - entry;
-    
-    // Calcular horas y minutos
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${hours}h ${minutes}m`;
-  }
-  
-  /**
-   * Vuelve a la página de inicio
-   */
+
+  // Métodos de navegación y acciones
   goBack() {
     this.router.navigate(['/home']);
   }
-  
-  /**
-   * Muestra un mensaje de éxito
-   */
-  private showSuccess(message: string) {
-    // Verificar si estamos en el navegador antes de mostrar el snackbar
-    if (isPlatformBrowser(this.platformId)) {
-      this.snackBar.open(message, 'Cerrar', {
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'top',
-        panelClass: ['success-snackbar']
-      });
-    } else {
-      console.log(message);
+
+  async registerVehicleEntry() {
+    if (!this.selectedLicensePlate) {
+      this.showError('Selecciona una placa válida');
+      return;
+    }
+
+    try {
+      await lastValueFrom(
+        this.vehicleService.registerEntry(
+          this.matricula,
+          this.selectedLicensePlate
+        )
+      );
+      this.showSuccess('Entrada registrada exitosamente');
+      await this.loadVehicleData();
+    } catch (error) {
+      this.showError('Error al registrar la entrada');
+      console.error('Entry error:', error);
     }
   }
-  
-  /**
-   * Muestra un mensaje de error
-   */
-  private showError(message: string) {
-    // Verificar si estamos en el navegador antes de mostrar el snackbar
-    if (isPlatformBrowser(this.platformId)) {
-      this.snackBar.open(message, 'Cerrar', {
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'top',
-        panelClass: ['error-snackbar']
-      });
-    } else {
-      console.error(message);
+
+  async registerVehicleExit(recordId: string) {
+    try {
+      await lastValueFrom(
+        this.vehicleService.registerExit(recordId)
+      );
+      this.showSuccess('Salida registrada exitosamente');
+      await this.loadVehicleData();
+    } catch (error) {
+      this.showError('Error al registrar la salida');
+      console.error('Exit error:', error);
     }
+  }
+
+  async removeVehicle(plate: string) {
+    try {
+      await lastValueFrom(
+        this.vehicleService.removeLicensePlateFromUser(
+          this.matricula,
+          plate
+        )
+      );
+      this.showSuccess('Vehículo eliminado correctamente');
+      await this.loadVehicleData();
+    } catch (error) {
+      this.showError('Error al eliminar el vehículo');
+      console.error('Remove vehicle error:', error);
+    }
+  }
+
+  // Helpers
+  get activeRecordsCount(): number {
+    return this.activeVehicleRecords.data.length;
+  }
+
+  formatDateTime(date: string): string {
+    return this.datePipe.transform(date, 'medium') || 'Fecha inválida';
+  }
+
+  calculateDuration(entry: string, exit?: string): string {
+    if (!exit) return 'En curso';
+    const entryTime = new Date(entry).getTime();
+    const exitTime = new Date(exit).getTime();
+    const diffMs = exitTime - entryTime;
+    const hours = Math.floor(diffMs / 3600000);
+    const minutes = Math.floor((diffMs % 3600000) / 60000);
+    return `${hours}h ${minutes}m`;
+  }
+
+  private showSuccess(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 3000,
+      panelClass: ['error-snackbar']
+    });
   }
 }

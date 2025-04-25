@@ -1,200 +1,122 @@
-import { Component, ViewChild, OnInit, PLATFORM_ID, Inject, AfterViewInit, ChangeDetectionStrategy, NgZone, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { Component, ViewChild, OnInit, AfterViewInit, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { MatPaginator, MatPaginatorModule, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
-import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { DatabaseService, StudentData, SortOptions } from '../../services/database.service';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+
+// Importaciones de Angular Material
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+
+// Importaciones necesarias para directivas y pipes
+import { CommonModule } from '@angular/common';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-home',
   templateUrl: './hom-component.component.html',
   styleUrls: ['./hom-component.component.scss'],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    MatToolbarModule,
+    // Módulos requeridos
+    CommonModule,
     MatIconModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatTableModule,
-    MatProgressSpinnerModule,
     MatPaginatorModule,
+    MatProgressSpinnerModule,
+    MatSidenavModule,
     MatSortModule,
-    MatFormFieldModule,
+    MatTableModule,
     MatInputModule,
-    ScrollingModule,
-    CommonModule
+    MatButtonModule
   ]
 })
 export class HomComponentComponent implements OnInit, AfterViewInit {
-  @ViewChild('sidenav') sidenav!: MatSidenav;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('input') searchInputRef!: ElementRef;
 
-  displayedColumns: string[] = ['Matricula', 'Apellido Paterno', 'Apellido Materno', 'Nombre', 'Email'];
-  dataSource: MatTableDataSource<StudentData>;
-  errorMessage: string = '';
-  isLoading: boolean = true;
-  isBrowser: boolean;
+  displayedColumns: string[] = ['matricula', 'apellido_paterno', 'apellido_materno', 'nombre', 'email', 'registrar'];
+  dataSource = new MatTableDataSource<StudentData>();
+  errorMessage = '';
+  isLoading = true;
   totalStudents = 0;
-  currentPageSize = 10; // Tamaño de página por defecto
+  currentPageSize = 10;
   private searchTerms = new Subject<string>();
 
-  // Nuevas propiedades para UI
-  isSearchExpanded: boolean = false;
-  isUserMenuOpen: boolean = false;
-  userDisplayName: string | null = null;
-  userEmail: string | null = null;
+  isSearchExpanded = false;
+  isUserMenuOpen = false;
+  userDisplayName = 'Usuario Demo';
+  userEmail = 'usuario@ejemplo.com';
+  isSorting = false; // Añadido para solucionar error
 
-  // Opciones de ordenación actuales
   currentSortOptions: SortOptions | undefined;
-  isSorting: boolean = false;
 
   constructor(
     private router: Router,
     private dbService: DatabaseService,
-    private paginatorIntl: MatPaginatorIntl,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef,
-    @Inject(PLATFORM_ID) platformId: Object
+    private cdr: ChangeDetectorRef
   ) {
-    this.isBrowser = isPlatformBrowser(platformId);
-    this.dataSource = new MatTableDataSource<StudentData>([]);
-    this.initializePaginatorLabels();
-
-    // Configurar el filtrado
     this.searchTerms.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       tap(term => this.performSearch(term))
     ).subscribe();
-
-    // Simular datos de usuario (reemplazar con datos reales del servicio de autenticación)
-    this.loadUserData();
   }
 
   @HostListener('document:click', ['$event'])
   clickOutside(event: Event) {
-    // Cerrar el menú de usuario si se hace clic fuera
     if (this.isUserMenuOpen && !(event.target as HTMLElement).closest('.user-menu-container')) {
       this.isUserMenuOpen = false;
       this.cdr.detectChanges();
     }
   }
 
-  private loadUserData() {
-    // Aquí deberías obtener los datos del usuario del servicio de autenticación
-    // Por ahora usamos datos simulados
-    this.userDisplayName = 'Usuario Demo';
-    this.userEmail = 'usuario@ejemplo.com';
-  }
-
-  private initializePaginatorLabels() {
-    this.paginatorIntl.itemsPerPageLabel = 'Items por página:';
-    this.paginatorIntl.nextPageLabel = 'Siguiente página';
-    this.paginatorIntl.previousPageLabel = 'Página anterior';
-    this.paginatorIntl.firstPageLabel = 'Primera página';
-    this.paginatorIntl.lastPageLabel = 'Última página';
-    this.paginatorIntl.getRangeLabel = (page: number, pageSize: number, length: number) => {
-      if (length === 0 || pageSize === 0) {
-        return `0 de ${length}`;
-      }
-      length = Math.max(length, 0);
-      const startIndex = page * pageSize;
-      const endIndex = startIndex < length ? 
-        Math.min(startIndex + pageSize, length) : startIndex + pageSize;
-      return `${startIndex + 1} - ${endIndex} de ${length}`;
-    };
-  }
-
   ngOnInit(): void {
-    this.loadMetadata();
+    this.loadStudentsPage();
   }
 
   ngAfterViewInit() {
     if (this.paginator) {
-      // No asignar el paginador directamente al dataSource
-      // this.dataSource.paginator = this.paginator;
-      
-      // Configurar el cambio de página
       this.paginator.page.subscribe(() => {
         this.currentPageSize = this.paginator.pageSize;
         this.loadStudentsPage();
       });
     }
-    
+
     if (this.sort) {
-      // Suscribirnos a los cambios de ordenación
       this.sort.sortChange.subscribe((sort: Sort) => {
         this.handleSortChange(sort);
       });
     }
   }
 
-  loadMetadata() {
-    this.isLoading = true;
-    this.cdr.detectChanges();
-    
-    this.dbService.getMetadata().subscribe({
-      next: (metadata) => {
-        this.totalStudents = metadata.total;
-        if (this.paginator) {
-          this.paginator.length = metadata.total;
-          this.paginator.pageSize = this.currentPageSize;
-        }
-        
-        // Cargar la primera página
-        this.loadStudentsPage();
-      },
-      error: (error) => {
-        console.error('Error cargando metadata:', error);
-        this.errorMessage = 'Error cargando la información. Intente recargar la página.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
   loadStudentsPage() {
-    if (!this.paginator) return;
-    this.loadStudentsFromServer(this.paginator.pageIndex, this.paginator.pageSize);
-  }
-
-  loadStudentsFromServer(pageIndex: number, pageSize: number) {
     this.isLoading = true;
-    this.isSorting = this.currentSortOptions !== undefined;
-    this.cdr.detectChanges();
-    
-    this.dbService.getStudents(pageIndex, pageSize, this.currentSortOptions).subscribe({
-      next: (students) => {
-        this.ngZone.run(() => {
-          this.dataSource.data = students;
+    const pageIndex = this.paginator?.pageIndex || 0;
+
+    this.dbService.getStudents(pageIndex, this.currentPageSize, this.currentSortOptions)
+      .subscribe({
+        next: (response) => {
+          this.dataSource.data = response.results;
+          this.totalStudents = response.count;
           this.isLoading = false;
-          this.isSorting = false;
-          this.errorMessage = '';
           this.cdr.detectChanges();
-        });
-      },
-      error: (error) => {
-        console.error('Error cargando estudiantes:', error);
-        this.errorMessage = 'Error cargando datos de estudiantes.';
-        this.isLoading = false;
-        this.isSorting = false;
-        this.cdr.detectChanges();
-      }
-    });
+        },
+        error: (error) => {
+          console.error('Error cargando estudiantes:', error);
+          this.errorMessage = 'Error cargando datos de estudiantes.';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   applyFilter(event: Event) {
@@ -204,24 +126,17 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
 
   performSearch(term: string) {
     if (!term) {
-      // Si el término está vacío, volver a la vista paginada
       this.loadStudentsPage();
       return;
     }
 
     this.isLoading = true;
-    this.cdr.detectChanges();
-    
     this.dbService.searchStudents(term).subscribe({
       next: (students) => {
-        this.ngZone.run(() => {
-          this.dataSource.data = students;
-          if (this.paginator) {
-            this.paginator.pageIndex = 0;
-          }
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        });
+        this.dataSource.data = students;
+        this.totalStudents = students.length;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error en la búsqueda:', error);
@@ -231,21 +146,35 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     });
   }
 
-  toggleSidenav() {
-    this.sidenav.toggle();
+  handleSortChange(sort: Sort): void {
+    this.isSorting = true; // Indicar que estamos ordenando
+    this.currentSortOptions = sort.direction ? {
+      active: sort.active as keyof StudentData,
+      direction: sort.direction
+    } : undefined;
+
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.loadStudentsPage();
+    this.isSorting = false; // Finalizar ordenamiento
   }
 
-  // Nuevos métodos para UI
+  navigateToUserPage(student: StudentData): void {
+    if (student?.matricula) {
+      this.router.navigate(['/user', student.matricula], {
+        state: { userData: student }
+      });
+    }
+  }
+
+  // Métodos de UI mantienen la misma funcionalidad
   toggleSearch() {
     this.isSearchExpanded = !this.isSearchExpanded;
-    this.cdr.detectChanges();
-    
     if (this.isSearchExpanded && this.searchInputRef) {
-      // Esperar a que la animación termine para enfocar el input
-      setTimeout(() => {
-        this.searchInputRef.nativeElement.focus();
-      }, 300);
+      setTimeout(() => this.searchInputRef.nativeElement.focus(), 300);
     }
+    this.cdr.detectChanges();
   }
 
   toggleUserMenu() {
@@ -254,75 +183,12 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   }
 
   logout() {
-    // Implementar la lógica de cierre de sesión (llamar al servicio de autenticación)
-    // Por ahora simplemente redirigimos al login
     this.router.navigate(["login"]);
   }
 
-  public goBack() {
-    this.router.navigate(["login"]);
-  }
-
-  clearCache() {
-    this.isLoading = true;
-    this.cdr.detectChanges();
-    
-    this.dbService.clearCache().subscribe({
-      next: () => {
-        this.loadMetadata();
-      },
-      error: (error) => {
-        console.error('Error limpiando caché:', error);
-        this.isLoading = false;
-        this.errorMessage = 'Error limpiando caché. Intente nuevamente.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  // Nuevo método para manejar el evento del paginador
-  onPageChange(event: PageEvent) {
+  // Método para manejar el cambio de página
+  onPageChange(event: PageEvent): void {
     this.currentPageSize = event.pageSize;
-    
-    // Solo cargamos nuevos datos si no estamos en modo de filtrado/búsqueda
-    if (this.searchInputRef?.nativeElement.value === '') {
-      this.loadStudentsFromServer(event.pageIndex, event.pageSize);
-    }
-    
-    this.cdr.detectChanges();
-  }
-
-  /**
-   * Maneja el cambio en la ordenación
-   */
-  handleSortChange(sort: Sort): void {
-    if (!sort.active || sort.direction === '') {
-      this.currentSortOptions = undefined;
-    } else {
-      this.currentSortOptions = {
-        active: sort.active,
-        direction: sort.direction as 'asc' | 'desc'
-      };
-    }
-    
-    // Volver a la primera página al cambiar la ordenación
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
-    
-    // Recargar los datos con la nueva ordenación
     this.loadStudentsPage();
-  }
-
-  /**
-   * Navega a la página de detalle del usuario cuando se hace clic en una fila
-   */
-  navigateToUserPage(student: StudentData): void {
-    if (student && student.Matricula) {
-      // Navegamos a la ruta /user/:matricula
-      this.router.navigate(['/user', student.Matricula], {
-        state: { userData: student } // Pasamos los datos del estudiante como estado
-      });
-    }
   }
 }

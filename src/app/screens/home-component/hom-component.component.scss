@@ -3,6 +3,10 @@
   flex-direction: column;
 }
 
+.spacer {
+  flex: 1; /* Ocupa espacio restante */
+}
+
 .Menu {
   display: flex;
   justify-content: flex-start;
@@ -47,12 +51,12 @@
   transition: width 0.3s ease;
   display: flex;
   align-items: center;
-  
+
   &.expanded {
     width: 250px;
     margin-right: 10px;
   }
-  
+
   input {
     padding: 8px 12px;
     border: none;
@@ -61,7 +65,7 @@
     color: white;
     outline: none;
     width: 100%;
-    
+
     &::placeholder {
       color: rgba(255, 255, 255, 0.7);
     }
@@ -94,34 +98,34 @@
   overflow: hidden;
   margin-top: 8px;
   animation: fadeIn 0.2s ease-in-out;
-  
+
   .user-info {
     padding: 16px;
     background-color: #f5f5f5;
     border-bottom: 1px solid #e0e0e0;
-    
+
     .user-name {
       margin: 0 0 4px 0;
       font-weight: 500;
       font-size: 16px;
     }
-    
+
     .user-email {
       margin: 0;
       font-size: 14px;
       color: #666;
     }
   }
-  
+
   .menu-options {
     padding: 8px;
-    
+
     button {
       width: 100%;
       text-align: left;
       padding: 8px 16px;
       border-radius: 4px;
-      
+
       &:hover {
         background-color: #f0f0f0;
       }
@@ -171,7 +175,7 @@
   flex: 1;
   overflow: auto;
   position: relative;
-  
+
   table {
     width: 100%;
     border-collapse: separate;
@@ -233,7 +237,7 @@ mat-paginator {
   padding: 20px;
   border-radius: 8px;
   z-index: 1000;
-  
+
   p {
     margin-top: 10px;
     font-weight: 500;
@@ -251,7 +255,7 @@ mat-paginator {
   font-size: 14px;
   color: #0066FF;
   border: 1px solid rgba(0, 102, 255, 0.3);
-  
+
   .sort-icon {
     margin-right: 8px;
     font-size: 18px;
@@ -265,11 +269,11 @@ mat-paginator {
   height: 16px;
   vertical-align: middle;
   margin-left: 4px;
-  
+
   &.asc {
     color: #0066FF;
   }
-  
+
   &.desc {
     color: #ff4500;
   }
@@ -307,7 +311,7 @@ mat-paginator {
   .search-input-container.expanded {
     width: 180px;
   }
-  
+
   .paginator-container {
     justify-content: center;
   }
@@ -319,6 +323,67 @@ mat-paginator {
 
   &:hover {
     background-color: rgba(0, 102, 255, 0.05);
+  }
+}
+
+// En el archivo CSS/SCSS de tu componente
+button[mat-flat-button] {
+  background-color: #3f51b5; // Color primario del tema
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: darken(#3f51b5, 10%);
+  }
+}
+
+.title {
+  color: white;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0 16px; /* Espacio horizontal entre el título y los spacers */
+  white-space: nowrap; /* Evita saltos de línea */
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Espacio entre el buscador y el ícono de usuario */
+}
+
+/* Clase .spacer para ocupar espacio sobrante */
+.spacer {
+  flex: 1;
+}
+
+/* Estilos para la columna del botón */
+.button-cell {
+  text-align: center;
+  padding: 8px 16px !important;
+}
+
+.button-click-aqui {
+  display: flex;
+  justify-content: center;
+
+  button[mat-flat-button] {
+    background-color: #0066FF;
+    color: white;
+    border-radius: 20px;
+    padding: 6px 20px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #0052cc;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
 
