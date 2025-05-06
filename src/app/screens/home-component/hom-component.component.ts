@@ -119,9 +119,13 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
       });
   }
 
+  // Actualiza el método applyFilter
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.searchTerms.next(filterValue.trim());
+    if (this.paginator) {
+      this.paginator.pageIndex = 0; // Reinicia la paginación al buscar
+    }
   }
 
   performSearch(term: string) {
@@ -131,10 +135,12 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     }
 
     this.isLoading = true;
-    this.dbService.searchStudents(term).subscribe({
-      next: (students) => {
-        this.dataSource.data = students;
-        this.totalStudents = students.length;
+    const pageIndex = this.paginator?.pageIndex || 0;
+
+    this.dbService.searchStudents(term, pageIndex, this.currentPageSize).subscribe({
+      next: (response) => {
+        this.dataSource.data = response.results;
+        this.totalStudents = response.count;
         this.isLoading = false;
         this.cdr.detectChanges();
       },

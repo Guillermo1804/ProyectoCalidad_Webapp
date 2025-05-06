@@ -50,11 +50,17 @@ export class DatabaseService {
     );
   }
 
-  searchStudents(term: string): Observable<StudentData[]> {
-    const params = new HttpParams().set('search', term);
+  searchStudents(term: string, page: number = 0, pageSize: number = 10): Observable<{ results: StudentData[], count: number }> {
+    const params = new HttpParams()
+      .set('q', term)
+      .set('page', (page + 1).toString())
+      .set('page_size', pageSize.toString());
 
-    return this.http.get<PaginatedResponse>(this.apiUrl, { params }).pipe(
-      map(response => response.results),
+    return this.http.get<PaginatedResponse>(`${this.apiUrl}buscar/`, { params }).pipe(
+      map(response => ({
+        results: response.results,
+        count: response.count
+      })),
       catchError(this.handleError)
     );
   }
