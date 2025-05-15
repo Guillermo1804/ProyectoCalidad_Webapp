@@ -46,7 +46,6 @@ import { VehicleService, VehicleRecord, VehicleHistory } from '../../services/ve
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatOptionModule,
-    DatePipe,
   ],
   providers: [DatePipe]
 })
