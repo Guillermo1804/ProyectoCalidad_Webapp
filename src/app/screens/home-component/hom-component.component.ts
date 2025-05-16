@@ -19,7 +19,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule } from '@angular/common';
-
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCardModule } from '@angular/material/card';
+import { FormsModule } from '@angular/forms';
  
 
 @Component({
@@ -29,6 +31,9 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [
     CommonModule,
+    MatTabsModule,
+    MatCardModule,
+    FormsModule,
     RouterModule,
     MatTableModule,
     MatPaginatorModule,
@@ -59,6 +64,12 @@ public isUserMenuOpen: boolean = false;
 public userDisplayName: string | null = null;
 public isSorting: boolean = false;
 public userEmail: string = '';
+public selectedLicensePlate: string = '';
+activeRecordsColumns: string[] = ['placa', 'entry_time', 'actions'];
+activeVehicleRecords: any[] = [];
+historicalRecords: any[] = [];
+historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'duration'];
+
 
   constructor(
     private dbService: DatabaseService,
@@ -129,6 +140,43 @@ public userEmail: string = '';
     console.log('Logout clicked');
     this.router.navigate(["login"]);
   }
+
+calculateDuration(record: any): string {
+  if (!record.entry_time || !record.exit_time) {
+    return '—';
+  }
+  const entry = new Date(record.entry_time);
+  const exit = new Date(record.exit_time);
+  const diffMs = exit.getTime() - entry.getTime();
+  if (isNaN(diffMs) || diffMs < 0) {
+    return '—';
+  }
+  const diffMins = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMins / 60);
+  const mins = diffMins % 60;
+  return hours > 0
+    ? `${hours}h ${mins}m`
+    : `${mins}m`;
+}
+
+registerVehicleEntry() {
+  // TODO: Implement the logic for registering a vehicle entry
+  // For now, just log to the console to avoid errors
+  console.log('registerVehicleEntry called');
+}
+
+formatDateTime(dateTime: string | Date): string {
+  if (!dateTime) return '';
+  const date = new Date(dateTime);
+  if (isNaN(date.getTime())) return '';
+  // Format as 'dd/MM/yyyy HH:mm'
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
 
 sortData(event: any): void {
   // Implement sorting logic here or leave empty if handled by MatTableDataSource
