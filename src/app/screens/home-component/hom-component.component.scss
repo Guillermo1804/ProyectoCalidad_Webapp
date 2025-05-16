@@ -7,383 +7,190 @@
   flex: 1; /* Ocupa espacio restante */
 }
 
+// Nuevos estilos para el menú principal
 .Menu {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: #0066FF;
-  height: 64px;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  z-index: 1001;
-  padding: 0 24px;
-}
+  background: linear-gradient(90deg, #0066FF, #0052cc);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  animation: slideInDown 0.5s ease-out;
 
-.slide-bar {
-  cursor: pointer;
-  font-size: 30px;
-  color: white;
-}
-
-.spacer {
-  flex: 1;
-}
-
-// Contenedor de búsqueda con animación
-.search-container {
-  display: flex;
-  align-items: center;
-  margin-right: 16px;
-}
-
-.search-icon {
-  cursor: pointer;
-  font-size: 24px;
-  color: white;
-  z-index: 2;
-  transition: all 0.3s ease;
-}
-
-.search-input-container {
-  width: 0;
-  overflow: hidden;
-  transition: width 0.3s ease;
-  display: flex;
-  align-items: center;
-
-  &.expanded {
-    width: 250px;
-    margin-right: 10px;
-  }
-
-  input {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    outline: none;
-    width: 100%;
-
-    &::placeholder {
-      color: rgba(255, 255, 255, 0.7);
-    }
-  }
-}
-
-// Estilo para el menú de usuario
-.user-menu-container {
-  position: relative;
-  padding-right: 12px;
-  margin-left: 16px;
-}
-
-.user-icon {
-  cursor: pointer;
-  font-size: 30px;
-  color: white;
-  padding-right: 2rem;
-}
-
-.user-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  width: 250px;
-  z-index: 1001;
-  overflow: hidden;
-  margin-top: 8px;
-  animation: fadeIn 0.2s ease-in-out;
-
-  .user-info {
-    padding: 16px;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #e0e0e0;
-
-    .user-name {
-      margin: 0 0 4px 0;
-      font-weight: 500;
-      font-size: 16px;
-    }
-
-    .user-email {
-      margin: 0;
-      font-size: 14px;
-      color: #666;
+  .slide-bar {
+    transition: transform 0.3s ease;
+    &:hover {
+      transform: scale(1.2);
+      color: #e0e0e0;
     }
   }
 
-  .menu-options {
-    padding: 8px;
+  .title {
+    font-size: 1.8em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    animation: fadeInRight 0.5s ease-out;
+    letter-spacing: 1px;
+  }
+}
 
-    button {
-      width: 100%;
-      text-align: left;
-      padding: 8px 16px;
-      border-radius: 4px;
+// Mejoras en la tabla
+.table-wrapper {
+  background: white;
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease-out;
 
+  .mat-row {
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: linear-gradient(90deg, rgba(0,102,255,0.1), rgba(0,102,255,0.05));
+      transform: translateX(5px);
+      box-shadow: -5px 0 10px rgba(0,0,0,0.1);
+    }
+  }
+
+  .mat-header-row {
+    background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+    
+    .mat-header-cell {
+      font-weight: 600;
+      color: #2c3e50;
+      transition: color 0.3s ease;
+      
       &:hover {
-        background-color: #f0f0f0;
+        color: #0066FF;
       }
     }
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+// Animación para el loading spinner
+.loading-overlay {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
 
-.sidenav-container {
-  height: 100vh;
-
-  mat-sidenav {
-    width: 250px;
-    padding: 10px;
-    background-color: #f4f4f4;
+  .mat-progress-spinner {
+    animation: rotate 2s linear infinite;
   }
-}
 
-.main-content {
-  height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  margin-top: 64px;
-  padding: 0;
-}
-
-// Contenedor principal de la tabla que incluye tanto la tabla como el paginador
-.table-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  margin: 0;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-// Wrapper para la tabla con scroll
-.table-wrapper {
-  flex: 1;
-  overflow: auto;
-  position: relative;
-
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-}
-
-.mat-header-row {
-  min-height: 48px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: white;
-}
-
-.mat-header-cell, .mat-cell {
-  padding: 8px 16px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:first-child {
-    padding-left: 24px;
-  }
-}
-
-.mat-header-cell {
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.87);
-  font-size: 14px;
-  background-color: #f5f5f5;
-}
-
-.mat-row {
-  min-height: 48px;
-
-  &:hover {
-    background: #f5f5f5;
-  }
-}
-
-mat-paginator {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  background: white;
-  border-top: 1px solid rgba(0,0,0,0.12);
-  display: flex;
-  justify-content: flex-end;
-}
-
-.loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 20px;
-  border-radius: 8px;
-  z-index: 1000;
-
-  p {
-    margin-top: 10px;
-    font-weight: 500;
-  }
-}
-
-// Indicador de ordenación global
-.sort-indicator {
-  background-color: #e5f2ff;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin: 8px 16px 0;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: #0066FF;
-  border: 1px solid rgba(0, 102, 255, 0.3);
-
-  .sort-icon {
-    margin-right: 8px;
-    font-size: 18px;
-  }
-}
-
-// Indicador de ordenación en encabezados
-.sort-active-indicator {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  vertical-align: middle;
-  margin-left: 4px;
-
-  &.asc {
+  .loading-text {
+    margin-top: 20px;
+    font-size: 1.1em;
     color: #0066FF;
-  }
-
-  &.desc {
-    color: #ff4500;
+    animation: pulse 1.5s infinite;
   }
 }
 
+// Mejoras en el search input
+.search-input-container {
+  &.expanded {
+    animation: expandWidth 0.3s ease-out forwards;
+    
+    .mat-form-field {
+      background: rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 0 15px;
+      
+      input {
+        color: white;
+        &::placeholder {
+          color: rgba(255,255,255,0.7);
+        }
+      }
+    }
+  }
+}
+
+// Animaciones personalizadas
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 250px;
+    opacity: 1;
+  }
+}
+
+// Mejoras en el error message
 .error-message {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  padding: 12px 24px;
-  font-size: 14px;
-  color: #d32f2f;
-  background-color: #fde0e0;
-  border-radius: 4px;
-  max-width: 80%;
-  z-index: 1000;
-}
-
-// Optimizaciones para la tabla y el scroll
-:host {
-  display: block;
-  height: 100%;
-}
-
-.no-data-row {
-  padding: 16px;
-  text-align: center;
-  color: rgba(0,0,0,0.54);
-}
-
-// Soporte para vista en dispositivos móviles
-@media (max-width: 600px) {
-  .search-input-container.expanded {
-    width: 180px;
-  }
-
-  .paginator-container {
-    justify-content: center;
-  }
-}
-
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: rgba(0, 102, 255, 0.05);
-  }
-}
-
-// En el archivo CSS/SCSS de tu componente
-button[mat-flat-button] {
-  background-color: #3f51b5; // Color primario del tema
+  animation: shake 0.5s ease-in-out;
+  background: linear-gradient(45deg, #ff4444, #cc0000);
   color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-/*
-  &:hover {
-    background-color: darken(#3f51b5, 10%);
-  }*/
-}
-
-.title {
-  color: white;
-  font-size: 1.5em;
-  font-weight: bold;
-  margin: 0 16px; /* Espacio horizontal entre el título y los spacers */
-  white-space: nowrap; /* Evita saltos de línea */
-}
-
-.right-section {
-  display: flex;
-  align-items: center;
-  gap: 16px; /* Espacio entre el buscador y el ícono de usuario */
-}
-
-/* Clase .spacer para ocupar espacio sobrante */
-.spacer {
-  flex: 1;
-}
-
-/* Estilos para la columna del botón */
-.button-cell {
-  text-align: center;
-  padding: 8px 16px !important;
-}
-
-.button-click-aqui {
-  display: flex;
-  justify-content: center;
-
-  button[mat-flat-button] {
-    background-color: #0066FF;
-    color: white;
-    border-radius: 20px;
-    padding: 6px 20px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background-color: #0052cc;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
+  box-shadow: 0 4px 15px rgba(204,0,0,0.3);
+  
+  .mat-icon {
+    animation: bounce 1s infinite;
   }
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(-50%) translateX(0); }
+  20%, 60% { transform: translateX(-50%) translateX(-5px); }
+  40%, 80% { transform: translateX(-50%) translateX(5px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+// Estilo para el paginador
+mat-paginator {
+  background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+  border-top: 2px solid rgba(0,102,255,0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: linear-gradient(90deg, #e9ecef, #f8f9fa);
+  }
+}
+
+// Mejoras en el sort indicator
+.sort-indicator {
+  background: linear-gradient(45deg, #e5f2ff, #f0f8ff);
+  border-left: 4px solid #0066FF;
+  transform: translateX(0);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateX(5px);
+    box-shadow: -2px 2px 8px rgba(0,102,255,0.2);
+  }
+}
+
+
+
 

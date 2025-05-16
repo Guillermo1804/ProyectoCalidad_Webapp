@@ -25,7 +25,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-hom-component',
   templateUrl: './hom-component.component.html',
-  styleUrls: ['./hom-component.component.css'],
+  styleUrls: ['./hom-component.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
