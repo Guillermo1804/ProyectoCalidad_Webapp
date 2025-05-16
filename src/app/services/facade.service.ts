@@ -15,12 +15,12 @@ const httpOptions = {
 };
 
 //Variables para las cookies
-const session_cookie_name = 'sistema-fcc-token';
-const user_email_cookie_name = 'sistema-fcc-email';
-const user_id_cookie_name = 'sistema-fcc-user_id';
-const user_complete_name_cookie_name = 'sistema-fcc-user_complete_name';
-const group_name_cookie_name = 'sistema-fcc-group_name';
-const codigo_cookie_name = 'sistema-fcc-codigo';
+const session_cookie_name = 'calidad-token';
+const user_email_cookie_name = 'calidad-email';
+const user_id_cookie_name = 'calidad-user_id';
+const user_complete_name_cookie_name = 'calidad-user_complete_name';
+const group_name_cookie_name = 'calidad-group_name';
+const codigo_cookie_name = 'calidad-codigo';
 
 @Injectable({
   providedIn: 'root'

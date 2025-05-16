@@ -127,6 +127,7 @@ public userEmail: string = '';
   public logout(): void {
     // TODO: Implement logout logic, e.g., call an AuthService and navigate to login
     console.log('Logout clicked');
+    this.router.navigate(["login"]);
   }
 
 sortData(event: any): void {
