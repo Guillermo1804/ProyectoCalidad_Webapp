@@ -54,6 +54,9 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<StudentData>();
   totalStudents = 0;
   currentPageSize = 10;
+  currentPageIndex = 0;
+  pageSizeOptions = [10, 25, 50, 100];
+
   isLoading = true;
   errorMessage = '';
   private searchTerms = new Subject<string>();
@@ -87,13 +90,23 @@ historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'durat
   }
 
   ngAfterViewInit() {
+    if (this.paginator) {
+      // Configurar el paginator
+      this.paginator.page.subscribe((event) => {
+        this.currentPageIndex = event.pageIndex;
+        this.currentPageSize = event.pageSize;
+        this.loadStudentsPage();
+      });
+    }
+
     if (this.sort) {
       this.sort.sortChange.subscribe((sort: Sort) => {
         this.currentSortOptions = {
           active: sort.active as keyof StudentData,
           direction: sort.direction as 'asc' | 'desc' | ''
         };
-        this.paginator.pageIndex = 0;
+        this.paginator.pageIndex = 0; // Reset a primera página al ordenar
+        this.currentPageIndex = 0;
         this.loadStudentsPage();
       });
     }
@@ -104,18 +117,18 @@ historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'durat
     this.errorMessage = '';
     
     this.dbService.getStudents(
-      this.paginator?.pageIndex || 0,
+      this.currentPageIndex,
       this.currentPageSize,
       this.currentSortOptions
     ).subscribe({
       next: (response) => {
-        this.dataSource.data = response.results;
+        this.dataSource = new MatTableDataSource(response.results);
         this.totalStudents = response.count;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error.message;
+        this.errorMessage = 'Error al cargar los estudiantes: ' + error.message;
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -132,6 +145,7 @@ historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'durat
 
   onPageChange(event: any) {
     this.currentPageSize = event.pageSize;
+    this.currentPageIndex = event.pageIndex;
     this.loadStudentsPage();
   }
 

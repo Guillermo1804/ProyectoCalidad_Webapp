@@ -67,7 +67,7 @@
             </div>
 
             <div class="table-wrapper mat-elevation-z8">
-              <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)">
+              <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)" class="mat-elevation-z8">
                 <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>
                     {{ column | titlecase }}
@@ -97,12 +97,13 @@
                 </tr>
               </table>
 
-              <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
-                            [pageSize]="currentPageSize"
-                            [length]="totalStudents"
-                            (page)="onPageChange($event)"
-                            showFirstLastButtons
-                            aria-label="Seleccionar página">
+              <mat-paginator 
+                [length]="totalStudents"
+                [pageSize]="currentPageSize"
+                [pageSizeOptions]="[10, 25, 50, 100]"
+                [showFirstLastButtons]="true"
+                (page)="onPageChange($event)"
+                aria-label="Seleccionar página de estudiantes">
               </mat-paginator>
             </div>
           </div>

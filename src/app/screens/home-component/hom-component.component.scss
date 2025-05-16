@@ -30,34 +30,46 @@
 }
 
 // Mejoras en la tabla
+.table-container {
+  position: relative;
+  min-height: 200px;
+  max-height: calc(100vh - 300px);
+  overflow: auto;
+}
+
 .table-wrapper {
-  background: white;
-  border-radius: 8px;
-  animation: fadeIn 0.5s ease-out;
+  position: relative;
+  overflow: auto;
+}
 
-  .mat-row {
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: linear-gradient(90deg, rgba(0,102,255,0.1), rgba(0,102,255,0.05));
-      transform: translateX(5px);
-      box-shadow: -5px 0 10px rgba(0,0,0,0.1);
-    }
-  }
+table {
+  width: 100%;
+}
 
-  .mat-header-row {
-    background: linear-gradient(90deg, #f8f9fa, #e9ecef);
-    
-    .mat-header-cell {
-      font-weight: 600;
-      color: #2c3e50;
-      transition: color 0.3s ease;
-      
-      &:hover {
-        color: #0066FF;
-      }
-    }
+.mat-mdc-table {
+  width: 100%;
+  max-height: calc(100vh - 380px);
+  overflow: auto;
+}
+
+.mat-mdc-row {
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
   }
+}
+
+.mat-mdc-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: white;
+}
+
+mat-paginator {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background-color: white;
 }
 
 // Animación para el loading spinner
