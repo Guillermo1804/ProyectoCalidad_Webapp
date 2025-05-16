@@ -92,8 +92,7 @@ export class UserComponentComponent implements OnInit {
       apellido_paterno: 'Apellido',
       apellido_materno: 'Materno',
       nombre: 'Nombre',
-      email: `${this.matricula}@ejemplo.com`,
-      fecha_registro: new Date().toISOString()
+      email: ``,
     };
   }
 

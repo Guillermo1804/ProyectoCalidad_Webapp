@@ -2,7 +2,6 @@
   <mat-sidenav #sidenav mode="side" opened="false">
     <p>Contenido del menú lateral</p>
     <br>
-    <br>
     <button mat-button (click)="sidenav.close()">Cerrar</button>
   </mat-sidenav>
 
@@ -18,21 +17,31 @@
       <div class="right-section">
         <div class="search-container">
           <div class="search-input-container" [class.expanded]="isSearchExpanded">
-            <!-- Añadir matSuffix para el input -->
-            <input matInput (keyup)="applyFilter($event)" placeholder="Buscar estudiante..." #input>
+            <mat-form-field appearance="outline">
+              <input matInput 
+                     #input
+                     (keyup)="applyFilter($event)" 
+                     placeholder="Buscar estudiante...">
+              <mat-icon matSuffix class="search-icon" (click)="toggleSearch()">search</mat-icon>
+            </mat-form-field>
           </div>
-          <mat-icon class="search-icon" (click)="toggleSearch()">search</mat-icon>
         </div>
 
-        <div class="user-menu-container">
-          <mat-icon class="user-icon" (click)="toggleUserMenu()">person</mat-icon>
+        <div class="user-menu-container" [class.active]="isUserMenuOpen">
+          <button mat-icon-button (click)="toggleUserMenu()">
+            <mat-icon>person</mat-icon>
+          </button>
           <div class="user-menu" *ngIf="isUserMenuOpen">
             <div class="user-info">
               <p class="user-name">{{userDisplayName || 'Usuario'}}</p>
               <p class="user-email">{{userEmail || 'email@ejemplo.com'}}</p>
             </div>
+            <mat-divider></mat-divider>
             <div class="menu-options">
-              <button mat-button (click)="logout()">Cerrar sesión</button>
+              <button mat-button (click)="logout()">
+                <mat-icon>exit_to_app</mat-icon>
+                Cerrar sesión
+              </button>
             </div>
           </div>
         </div>
@@ -41,63 +50,66 @@
 
     <div class="main-content">
       <div class="table-container">
-        <!-- Corregir condición para mostrar el indicador de ordenamiento -->
-        <div *ngIf="currentSortOptions && !isLoading" class="sort-indicator">
-          <mat-icon class="sort-icon">sort</mat-icon>
+        <div *ngIf="currentSortOptions?.active && !isLoading" class="sort-indicator">
+          <mat-icon>sort</mat-icon>
           <span>
-            Ordenando por "{{ currentSortOptions.active | titlecase }}"
-            ({{ currentSortOptions.direction === 'asc' ? 'Ascendente' : 'Descendente' }})
+            Ordenando por "{{ currentSortOptions?.active | titlecase }}"
+            ({{ currentSortOptions?.direction === 'asc' ? 'Ascendente' : 'Descendente' }})
           </span>
         </div>
 
-        <div class="table-wrapper">
-          <table mat-table [dataSource]="dataSource" matSort>
-            <!-- Usar nombres de columnas en minúsculas -->
+        <div class="table-wrapper mat-elevation-z8">
+          <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)">
             <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>
                 {{ column | titlecase }}
-                <!-- Simplificar indicador de dirección -->
-                <mat-icon *ngIf="currentSortOptions?.active === column">
+                <mat-icon class="sort-icon" *ngIf="currentSortOptions?.active === column">
                   {{ currentSortOptions?.direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
                 </mat-icon>
               </th>
               <td mat-cell *matCellDef="let element">{{ element[column] }}</td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
             <tr mat-row
                 *matRowDef="let row; columns: displayedColumns;"
                 (click)="navigateToUserPage(row)"
-                class="clickable-row"></tr>
+                class="clickable-row">
+            </tr>
 
-            <!-- Mensaje cuando no hay datos -->
-            <tr *matNoDataRow>
-              <td colspan="displayedColumns.length" class="no-data-row">
-                No se encontraron resultados para "{{ input.value }}"
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell no-data-row" [attr.colspan]="displayedColumns.length">
+                <ng-container *ngIf="input.value; else noDataTemplate">
+                  No se encontraron resultados para "{{input.value}}"
+                </ng-container>
+                <ng-template #noDataTemplate>
+                  No hay datos disponibles
+                </ng-template>
               </td>
             </tr>
           </table>
-        </div>
 
-        <!-- Paginador simplificado -->
-        <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
-                     [pageSize]="currentPageSize"
-                     [length]="totalStudents"
-                     (page)="onPageChange($event)"
-                     aria-label="Seleccionar página">
-        </mat-paginator>
+          <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
+                        [pageSize]="currentPageSize"
+                        [length]="totalStudents"
+                        (page)="onPageChange($event)"
+                        showFirstLastButtons
+                        aria-label="Seleccionar página">
+          </mat-paginator>
+        </div>
       </div>
 
-      <!-- Spinner de carga mejorado -->
       <div *ngIf="isLoading" class="loading-overlay">
-        <mat-spinner diameter="50"></mat-spinner>
+        <mat-progress-spinner mode="indeterminate" 
+                            diameter="50"
+                            color="primary">
+        </mat-progress-spinner>
         <p class="loading-text">
           {{ isSorting ? 'Ordenando datos...' : 'Cargando estudiantes...' }}
         </p>
       </div>
 
-      <!-- Mensaje de error estilizado -->
-      <div *ngIf="errorMessage" class="error-message">
+      <div *ngIf="errorMessage" class="error-message mat-error">
         <mat-icon>error_outline</mat-icon>
         <span>{{ errorMessage }}</span>
       </div>
