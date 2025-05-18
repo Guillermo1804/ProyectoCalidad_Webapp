@@ -1,207 +1,228 @@
-.wrapper {
+/* === Variables opcionales para mantener consistencia === */
+$primary-color: #1976d2;
+$spacing: 16px;
+
+/* === Layout general === */
+.sidenav-container {
+  height: 100vh;
+}
+
+.side-nav {
+  width: 250px;
+}
+
+.top-bar {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing;
+  background-color: $primary-color;
+  color: white;
+  flex-wrap: wrap;
 }
 
-.spacer {
-  flex: 1; /* Ocupa espacio restante */
+.menu-button {
+  margin-right: $spacing;
 }
 
-// Nuevos estilos para el menú principal
-.Menu {
-  background: linear-gradient(90deg, #0066FF, #0052cc);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  animation: slideInDown 0.5s ease-out;
+.search-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  gap: 8px;
 
-  .slide-bar {
-    transition: transform 0.3s ease;
-    &:hover {
-      transform: scale(1.2);
-      color: #e0e0e0;
+  mat-form-field {
+    flex-grow: 1;
+    min-width: 200px;
+
+    &.expanded {
+      flex: 1;
     }
   }
 
-  .title {
-    font-size: 1.8em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    animation: fadeInRight 0.5s ease-out;
-    letter-spacing: 1px;
+  .search-toggle {
+    margin-left: auto;
   }
 }
 
-// Mejoras en la tabla
+.user-section {
+  margin-left: auto; // Este empuja el ícono a la derecha
+  display: flex;
+  align-items: center;
+  position: relative;
+
+  mat-icon {
+    cursor: pointer;
+  }
+
+  .user-menu {
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    min-width: 200px;
+    padding: 16px;
+    border-radius: 4px;
+
+    .user-info {
+      p {
+        margin: 4px 0;
+      }
+    }
+
+    .logout-button {
+      width: 100%;
+      text-align: left;
+      padding: 8px 0;
+    }
+  }
+}
+
+
+.main-content {
+  padding: $spacing;
+  padding-bottom: 80px; // margen inferior fijo
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.back-button {
+  margin-bottom: $spacing;
+}
+
 .table-container {
-  position: relative;
-  min-height: 200px;
-  max-height: calc(100vh - 300px);
-  overflow: auto;
-}
+  overflow-x: auto;
+  margin-bottom: $spacing;
 
-.table-wrapper {
-  position: relative;
-  overflow: auto;
-}
-
-table {
-  width: 100%;
-}
-
-.mat-mdc-table {
-  width: 100%;
-  max-height: calc(100vh - 380px);
-  overflow: auto;
-}
-
-.mat-mdc-row {
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+  table {
+    width: 100%;
+    min-width: 600px;
   }
-}
 
-.mat-mdc-header-row {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background-color: white;
+  .sort-indicator {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .no-data-row {
+    text-align: center;
+    font-style: italic;
+  }
 }
 
 mat-paginator {
-  position: sticky;
-  bottom: 0;
-  z-index: 100;
-  background-color: white;
+  margin-top: 16px;
 }
 
-// Animación para el loading spinner
-.loading-overlay {
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.3s ease-out;
-
-  .mat-progress-spinner {
-    animation: rotate 2s linear infinite;
+/* === Información estudiante === */
+.student-info {
+  mat-card {
+    width: 100%;
+    margin-bottom: $spacing;
   }
 
-  .loading-text {
-    margin-top: 20px;
-    font-size: 1.1em;
-    color: #0066FF;
-    animation: pulse 1.5s infinite;
-  }
-}
+  .info-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing;
 
-// Mejoras en el search input
-.search-input-container {
-  &.expanded {
-    animation: expandWidth 0.3s ease-out forwards;
-    
-    .mat-form-field {
-      background: rgba(255,255,255,0.15);
-      border-radius: 24px;
-      padding: 0 15px;
-      
-      input {
-        color: white;
-        &::placeholder {
-          color: rgba(255,255,255,0.7);
-        }
+    .info-item {
+      flex: 1 1 100%;
+      max-width: 100%;
+
+      label {
+        font-weight: bold;
       }
     }
   }
 }
 
-// Animaciones personalizadas
-@keyframes slideInDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
+/* === Registro Vehicular === */
+.vehicle-section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing;
+
+  .entry-card {
+    mat-card-content {
+      .entry-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        @media (min-width: 600px) {
+          flex-direction: row;
+          align-items: center;
+        }
+
+        mat-form-field {
+          flex: 1;
+        }
+
+        button {
+          white-space: nowrap;
+        }
+      }
+    }
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+
+  .active-vehicles,
+  .historical-records {
+    table {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    h3 {
+      margin: 16px 0 8px;
+    }
+
+    .no-data-row {
+      text-align: center;
+      font-style: italic;
+    }
   }
 }
 
-@keyframes fadeInRight {
-  from {
-    transform: translateX(-20px);
-    opacity: 0;
+/* === Responsive: móvil === */
+@media (max-width: 768px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
-  to {
-    transform: translateX(0);
-    opacity: 1;
+
+  .search-container {
+    width: 100%;
+    flex-direction: column;
+
+    mat-form-field,
+    .search-toggle {
+      width: 100%;
+    }
+  }
+
+  .info-grid {
+    flex-direction: column;
+  }
+
+  .vehicle-section .entry-form {
+    flex-direction: column !important;
   }
 }
 
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 1;
-  }
-}
 
-@keyframes expandWidth {
-  from {
-    width: 0;
-    opacity: 0;
-  }
-  to {
-    width: 250px;
-    opacity: 1;
-  }
-}
 
-// Mejoras en el error message
-.error-message {
-  animation: shake 0.5s ease-in-out;
-  background: linear-gradient(45deg, #ff4444, #cc0000);
-  color: white;
-  box-shadow: 0 4px 15px rgba(204,0,0,0.3);
-  
-  .mat-icon {
-    animation: bounce 1s infinite;
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(-50%) translateX(0); }
-  20%, 60% { transform: translateX(-50%) translateX(-5px); }
-  40%, 80% { transform: translateX(-50%) translateX(5px); }
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-// Estilo para el paginador
-mat-paginator {
-  background: linear-gradient(90deg, #f8f9fa, #e9ecef);
-  border-top: 2px solid rgba(0,102,255,0.1);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: linear-gradient(90deg, #e9ecef, #f8f9fa);
-  }
-}
-
-// Mejoras en el sort indicator
-.sort-indicator {
-  background: linear-gradient(45deg, #e5f2ff, #f0f8ff);
-  border-left: 4px solid #0066FF;
-  transform: translateX(0);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateX(5px);
-    box-shadow: -2px 2px 8px rgba(0,102,255,0.2);
-  }
-}
 
 
 

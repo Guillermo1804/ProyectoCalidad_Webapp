@@ -1,11 +1,12 @@
 import { Component, ViewChild, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { DatabaseService, StudentData, SortOptions } from '../../services/database.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { DatabaseService, StudentData, SortOptions, VehicleRecord } from '../../services/database.service';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 // Angular Material Imports
 import { MatTableModule } from '@angular/material/table';
@@ -22,7 +23,7 @@ import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
- 
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-hom-component',
@@ -34,7 +35,6 @@ import { FormsModule } from '@angular/forms';
     MatTabsModule,
     MatCardModule,
     FormsModule,
-    RouterModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -44,12 +44,15 @@ import { FormsModule } from '@angular/forms';
     MatProgressSpinnerModule,
     MatSidenavModule,
     MatDividerModule,
-    MatFormFieldModule,  ]
+    MatFormFieldModule,
+    MatSnackBarModule
+  ]
 })
 export class HomComponentComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  // Configuración de la tabla principal
   displayedColumns: string[] = ['matricula', 'apellido_paterno', 'apellido_materno', 'nombre', 'email'];
   dataSource = new MatTableDataSource<StudentData>();
   totalStudents = 0;
@@ -57,27 +60,35 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   currentPageIndex = 0;
   pageSizeOptions = [10, 25, 50, 100];
 
+  // Estados y carga
   isLoading = true;
+  detailsLoading = false;
   errorMessage = '';
   private searchTerms = new Subject<string>();
   currentSortOptions?: SortOptions;
 
-public isSearchExpanded: boolean = false;
-public isUserMenuOpen: boolean = false;
-public userDisplayName: string | null = null;
-public isSorting: boolean = false;
-public userEmail: string = '';
-public selectedLicensePlate: string = '';
-activeRecordsColumns: string[] = ['placa', 'entry_time', 'actions'];
-activeVehicleRecords: any[] = [];
-historicalRecords: any[] = [];
-historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'duration'];
+  // Interfaz de usuario
+  isSearchExpanded = false;
+  isUserMenuOpen = false;
+  userDisplayName = 'Usuario';
+  userEmail = 'usuario@ejemplo.com';
+  selectedLicensePlate = '';
 
+  // Registros vehiculares
+  activeRecordsColumns: string[] = ['placa', 'entry_time', 'actions'];
+  activeVehicleRecords: VehicleRecord[] = [];
+  historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'duration'];
+  historicalRecords: VehicleRecord[] = [];
+
+  // Estudiante seleccionado
+  selectedStudent: StudentData | null = null;
+  selectedTabIndex = 0;
 
   constructor(
     private dbService: DatabaseService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.searchTerms.pipe(
       debounceTime(300),
@@ -85,148 +96,225 @@ historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'durat
     ).subscribe(term => this.performSearch(term));
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadStudentsPage();
   }
 
-  ngAfterViewInit() {
-    if (this.paginator) {
-      // Configurar el paginator
-      this.paginator.page.subscribe((event) => {
-        this.currentPageIndex = event.pageIndex;
-        this.currentPageSize = event.pageSize;
-        this.loadStudentsPage();
-      });
-    }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.setupSorting();
+  }
 
+  // === CORRECCIÓN 1: Métodos faltantes añadidos ===
+  onPageChange(event: PageEvent): void {
+    this.currentPageIndex = event.pageIndex;
+    this.currentPageSize = event.pageSize;
+    this.loadStudentsPage();
+  }
+
+  sortData(sort: Sort): void {
+    this.currentSortOptions = {
+      active: sort.active as keyof StudentData,
+      direction: sort.direction as 'asc' | 'desc' | ''
+    };
+    this.paginator.firstPage();
+    this.loadStudentsPage();
+  }
+
+  // ==============================================
+
+  private setupSorting(): void {
     if (this.sort) {
       this.sort.sortChange.subscribe((sort: Sort) => {
         this.currentSortOptions = {
           active: sort.active as keyof StudentData,
           direction: sort.direction as 'asc' | 'desc' | ''
         };
-        this.paginator.pageIndex = 0; // Reset a primera página al ordenar
-        this.currentPageIndex = 0;
+        this.paginator.firstPage();
         this.loadStudentsPage();
       });
     }
   }
 
-  loadStudentsPage() {
+  loadStudentsPage(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     this.dbService.getStudents(
       this.currentPageIndex,
       this.currentPageSize,
       this.currentSortOptions
+    ).pipe(
+      finalize(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      })
     ).subscribe({
       next: (response) => {
-        this.dataSource = new MatTableDataSource(response.results);
+        this.dataSource.data = response.results;
         this.totalStudents = response.count;
-        this.isLoading = false;
-        this.cdr.detectChanges();
       },
-      error: (error) => {
-        this.errorMessage = 'Error al cargar los estudiantes: ' + error.message;
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      }
+      error: (error) => this.handleError('Error cargando estudiantes', error)
     });
   }
 
-  toggleSearch() {
-    this.isSearchExpanded = !this.isSearchExpanded;
-  }
+  performSearch(term: string): void {
+    const searchTerm = term.trim();
 
-  toggleUserMenu() {
-  this.isUserMenuOpen = !this.isUserMenuOpen;
-}
-
-  onPageChange(event: any) {
-    this.currentPageSize = event.pageSize;
-    this.currentPageIndex = event.pageIndex;
-    this.loadStudentsPage();
-  }
-
-  public logout(): void {
-    // TODO: Implement logout logic, e.g., call an AuthService and navigate to login
-    console.log('Logout clicked');
-    this.router.navigate(["login"]);
-  }
-
-calculateDuration(record: any): string {
-  if (!record.entry_time || !record.exit_time) {
-    return '—';
-  }
-  const entry = new Date(record.entry_time);
-  const exit = new Date(record.exit_time);
-  const diffMs = exit.getTime() - entry.getTime();
-  if (isNaN(diffMs) || diffMs < 0) {
-    return '—';
-  }
-  const diffMins = Math.floor(diffMs / 60000);
-  const hours = Math.floor(diffMins / 60);
-  const mins = diffMins % 60;
-  return hours > 0
-    ? `${hours}h ${mins}m`
-    : `${mins}m`;
-}
-
-registerVehicleEntry() {
-  // TODO: Implement the logic for registering a vehicle entry
-  // For now, just log to the console to avoid errors
-  console.log('registerVehicleEntry called');
-}
-
-formatDateTime(dateTime: string | Date): string {
-  if (!dateTime) return '';
-  const date = new Date(dateTime);
-  if (isNaN(date.getTime())) return '';
-  // Format as 'dd/MM/yyyy HH:mm'
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
-}
-
-sortData(event: any): void {
-  // Implement sorting logic here or leave empty if handled by MatTableDataSource
-  // Example: if using MatTableDataSource, you may not need to do anything
-}
-
-navigateToUserPage(row: any): void {
-    // Replace 'user-details' and 'id' with your actual route and identifier
-    this.router.navigate(['/user-details', row.id]);
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.searchTerms.next(filterValue.trim());
-  }
-
-  private performSearch(term: string) {
-    if (!term) {
+    if (!searchTerm) {
       this.loadStudentsPage();
       return;
     }
 
     this.isLoading = true;
-    this.dbService.searchStudents(term, this.paginator?.pageIndex || 0, this.currentPageSize)
+    this.currentPageIndex = 0;  // Resetear a primera página
+
+    // Forzar nueva instancia del dataSource
+    this.dataSource = new MatTableDataSource<StudentData>([]);
+
+    this.dbService.searchStudents(searchTerm, this.currentPageIndex, this.currentPageSize)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges(); // Forzar actualización de vista
+        })
+      )
       .subscribe({
         next: (response) => {
           this.dataSource.data = response.results;
           this.totalStudents = response.count;
-          this.isLoading = false;
-          this.cdr.detectChanges();
+
+          // Resetear paginador
+          if (this.paginator) {
+            this.paginator.firstPage();
+          }
         },
-        error: (error) => {
-          this.errorMessage = error.message;
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        }
+        error: (error) => this.handleError('Error en búsqueda', error)
       });
+  }
+
+  selectStudent(student: StudentData): void {
+    this.selectedStudent = student;
+    this.selectedTabIndex = 1; // Cambiar a la pestaña de información
+    this.loadVehicleRecords();
+  }
+
+  loadVehicleRecords(): void {
+    if (!this.selectedStudent) return;
+
+    this.detailsLoading = true;
+
+    this.dbService.getActiveRecords(this.selectedStudent.matricula)
+      .pipe(finalize(() => this.detailsLoading = false))
+      .subscribe({
+        next: (active) => this.activeVehicleRecords = active,
+        error: (error) => this.handleError('Error cargando registros activos', error)
+      });
+
+    this.dbService.getHistoricalRecords(this.selectedStudent.matricula)
+      .pipe(finalize(() => this.detailsLoading = false))
+      .subscribe({
+        next: (history) => this.historicalRecords = history,
+        error: (error) => this.handleError('Error cargando historial', error)
+      });
+  }
+
+  registerVehicleEntry(): void {
+    if (!this.selectedStudent || !this.selectedLicensePlate) {
+      this.showSnackBar('Por favor complete todos los campos requeridos');
+      return;
+    }
+
+    this.detailsLoading = true;
+    this.dbService.registerVehicleEntry(
+      this.selectedStudent.matricula,
+      this.selectedLicensePlate
+    ).pipe(
+      finalize(() => {
+        this.detailsLoading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: () => {
+        this.selectedLicensePlate = '';
+        this.loadVehicleRecords();
+        this.showSnackBar('Entrada registrada exitosamente');
+      },
+      error: (error) => this.handleError('Error registrando entrada', error)
+    });
+  }
+
+  registerVehicleExit(record: VehicleRecord): void {
+    if (!record.id) return;
+
+    this.detailsLoading = true;
+    this.dbService.registerVehicleExit(record.id)
+      .pipe(
+        finalize(() => {
+          this.detailsLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.loadVehicleRecords();
+          this.showSnackBar('Salida registrada exitosamente');
+        },
+        error: (error) => this.handleError('Error registrando salida', error)
+      });
+  }
+
+  backToStudentList(): void {
+    this.selectedStudent = null;
+    this.selectedTabIndex = 0;
+    this.loadStudentsPage();
+  }
+
+  private handleError(context: string, error: Error): void {
+    console.error(`${context}:`, error);
+    this.errorMessage = `${context}: ${error.message}`;
+    this.showSnackBar(this.errorMessage, 5000);
+  }
+
+  private showSnackBar(message: string, duration: number = 3000): void {
+    this.snackBar.open(message, 'Cerrar', { duration });
+  }
+
+  // Métodos de utilidad
+  formatDateTime(dateTime: string | Date): string {
+    if (!dateTime) return '';
+    const date = new Date(dateTime);
+    return isNaN(date.getTime()) ? '' :
+      `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  }
+
+  calculateDuration(record: VehicleRecord): string {
+    if (!record.entry_time || !record.exit_time) return '-';
+
+    const entry = new Date(record.entry_time);
+    const exit = new Date(record.exit_time);
+    const diff = Math.abs(exit.getTime() - entry.getTime());
+
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.searchTerms.next(filterValue.trim());
+  }
+
+  toggleSearch(): void {
+    this.isSearchExpanded = !this.isSearchExpanded;
+  }
+
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  logout(): void {
+    this.router.navigate(['/login']);
   }
 }
