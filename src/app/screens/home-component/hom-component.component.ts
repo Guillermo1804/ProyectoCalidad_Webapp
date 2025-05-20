@@ -2,7 +2,8 @@ import { Component, ViewChild, OnInit, AfterViewInit, ChangeDetectorRef } from '
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { DatabaseService, StudentData, SortOptions, VehicleRecord } from '../../services/database.service';
+import { DatabaseService, StudentData, SortOptions } from '../../services/database.service';
+import { FacadeServiceService } from '../../services/facade.service';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -24,6 +25,15 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+// Define VehicleRecord interface locally if not imported from anywhere else
+interface VehicleRecord {
+  id?: string;
+  placa: string;
+  entry_time: string | Date;
+  exit_time?: string | Date;
+  duration?: string;
+}
 
 @Component({
   selector: 'app-hom-component',
@@ -76,8 +86,10 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
 
   // Registros vehiculares
   activeRecordsColumns: string[] = ['placa', 'entry_time', 'actions'];
+  activeVehiclesDataSource = new MatTableDataSource<VehicleRecord>([]);
   activeVehicleRecords: VehicleRecord[] = [];
   historicalRecordsColumns: string[] = ['placa', 'entry_time', 'exit_time', 'duration'];
+  historicalDataSource = new MatTableDataSource<VehicleRecord>([]);
   historicalRecords: VehicleRecord[] = [];
 
   // Estudiante seleccionado
@@ -88,7 +100,8 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     private dbService: DatabaseService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private facadeService: FacadeServiceService // Agrega el FacadeServiceService
   ) {
     this.searchTerms.pipe(
       debounceTime(300),
@@ -204,17 +217,25 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
 
     this.detailsLoading = true;
 
-    this.dbService.getActiveRecords(this.selectedStudent.matricula)
+    this.facadeService.getActiveRecords(this.selectedStudent.matricula)
       .pipe(finalize(() => this.detailsLoading = false))
       .subscribe({
-        next: (active) => this.activeVehicleRecords = active,
+        next: (active) => {
+          const records = Array.isArray(active) ? active : [];
+          this.activeVehiclesDataSource.data = records;
+          this.activeVehicleRecords = records;
+        },
         error: (error) => this.handleError('Error cargando registros activos', error)
       });
 
-    this.dbService.getHistoricalRecords(this.selectedStudent.matricula)
+    this.facadeService.getHistoricalRecords(this.selectedStudent.matricula)
       .pipe(finalize(() => this.detailsLoading = false))
       .subscribe({
-        next: (history) => this.historicalRecords = history,
+        next: (history) => {
+          const records = Array.isArray(history) ? history : [];
+          this.historicalDataSource.data = records;
+          this.historicalRecords = records;
+        },
         error: (error) => this.handleError('Error cargando historial', error)
       });
   }
@@ -226,7 +247,8 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     }
 
     this.detailsLoading = true;
-    this.dbService.registerVehicleEntry(
+    // Cambia a usar facadeService para registrar la entrada del vehículo
+    this.facadeService.registerVehicleEntry(
       this.selectedStudent.matricula,
       this.selectedLicensePlate
     ).pipe(
@@ -248,7 +270,8 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     if (!record.id) return;
 
     this.detailsLoading = true;
-    this.dbService.registerVehicleExit(record.id)
+    // Cambia a usar facadeService para registrar la salida del vehículo
+    this.facadeService.registerVehicleExit(record.id)
       .pipe(
         finalize(() => {
           this.detailsLoading = false;

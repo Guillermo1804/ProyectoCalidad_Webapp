@@ -186,7 +186,7 @@
             <!-- Vehículos activos -->
             <div class="active-vehicles">
               <h3>Vehículos en campus</h3>
-              <table mat-table [dataSource]="activeVehicleRecords">
+              <table mat-table [dataSource]="activeVehiclesDataSource">
                 <ng-container matColumnDef="placa">
                   <th mat-header-cell *matHeaderCellDef>Placa</th>
                   <td mat-cell *matCellDef="let item">{{ item.placa }}</td>
@@ -200,9 +200,7 @@
                 <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef>Acciones</th>
                   <td mat-cell *matCellDef="let item">
-                    <button mat-icon-button
-                            color="warn"
-                            (click)="registerVehicleExit(item)">
+                    <button mat-icon-button color="warn" (click)="registerVehicleExit(item)">
                       <mat-icon>exit_to_app</mat-icon>
                     </button>
                   </td>
@@ -211,8 +209,11 @@
                 <tr mat-header-row *matHeaderRowDef="activeRecordsColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: activeRecordsColumns;"></tr>
 
-                <tr class="no-data-row" *matNoDataRow>
-                  <td colspan="3">No hay vehículos registrados</td>
+                <!-- Mensaje cuando no hay datos -->
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" [attr.colspan]="activeRecordsColumns.length">
+                    No hay vehículos activos en este momento
+                  </td>
                 </tr>
               </table>
             </div>
@@ -220,7 +221,7 @@
             <!-- Histórico -->
             <div class="historical-records">
               <h3>Historial de movimientos</h3>
-              <table mat-table [dataSource]="historicalRecords">
+              <table mat-table [dataSource]="historicalDataSource">
                 <ng-container matColumnDef="placa">
                   <th mat-header-cell *matHeaderCellDef>Placa</th>
                   <td mat-cell *matCellDef="let item">{{ item.placa }}</td>
@@ -244,8 +245,11 @@
                 <tr mat-header-row *matHeaderRowDef="historicalRecordsColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: historicalRecordsColumns;"></tr>
 
-                <tr class="no-data-row" *matNoDataRow>
-                  <td colspan="4">No hay registros históricos</td>
+                <!-- Mensaje cuando no hay datos -->
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" [attr.colspan]="historicalRecordsColumns.length">
+                    No hay registros históricos disponibles
+                  </td>
                 </tr>
               </table>
             </div>
