@@ -66,9 +66,9 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['matricula', 'apellido_paterno', 'apellido_materno', 'nombre', 'email'];
   dataSource = new MatTableDataSource<StudentData>();
   totalStudents = 0;
-  currentPageSize = 10;
+  currentPageSize = 25;
   currentPageIndex = 0;
-  pageSizeOptions = [10, 25, 50, 100];
+  pageSizeOptions = [25, 50, 100, 250];
 
   // Estados y carga
   isLoading = true;
@@ -114,14 +114,18 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
     this.setupSorting();
+    // Dar tiempo al componente para inicializarse
+    setTimeout(() => {
+      this.loadStudentsPage();
+    });
   }
 
   // === CORRECCIÓN 1: Métodos faltantes añadidos ===
   onPageChange(event: PageEvent): void {
-    this.currentPageIndex = event.pageIndex;
+    console.log('Cambio de página:', event); // Debug
     this.currentPageSize = event.pageSize;
+    this.currentPageIndex = event.pageIndex;
     this.loadStudentsPage();
   }
 
@@ -153,19 +157,29 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.dbService.getStudents(
+    console.log(`Solicitando página ${this.currentPageIndex} con ${this.currentPageSize} elementos`);
+
+    this.facadeService.getStudents(
       this.currentPageIndex,
       this.currentPageSize,
       this.currentSortOptions
     ).pipe(
       finalize(() => {
         this.isLoading = false;
-        this.cdr.detectChanges();
       })
     ).subscribe({
       next: (response) => {
-        this.dataSource.data = response.results;
+        this.dataSource = new MatTableDataSource(response.results);
         this.totalStudents = response.count;
+        
+        // Asegurarnos de que el paginador refleje los valores correctos
+        if (this.paginator) {
+          this.paginator.pageSize = this.currentPageSize;
+          this.paginator.pageIndex = this.currentPageIndex;
+          this.paginator.length = this.totalStudents;
+        }
+        
+        console.log(`Recibidos ${response.results.length} de ${response.count} estudiantes`);
       },
       error: (error) => this.handleError('Error cargando estudiantes', error)
     });
@@ -180,29 +194,27 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
     }
 
     this.isLoading = true;
-    this.currentPageIndex = 0;  // Resetear a primera página
+    this.errorMessage = '';
 
-    // Forzar nueva instancia del dataSource
-    this.dataSource = new MatTableDataSource<StudentData>([]);
-
-    this.dbService.searchStudents(searchTerm, this.currentPageIndex, this.currentPageSize)
+    this.facadeService.searchStudents(searchTerm, this.currentPageIndex, this.currentPageSize)
       .pipe(
         finalize(() => {
           this.isLoading = false;
-          this.cdr.detectChanges(); // Forzar actualización de vista
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: (response) => {
           this.dataSource.data = response.results;
           this.totalStudents = response.count;
-
-          // Resetear paginador
-          if (this.paginator) {
-            this.paginator.firstPage();
+          if (response.results.length === 0) {
+            this.showSnackBar('No se encontraron resultados');
           }
         },
-        error: (error) => this.handleError('Error en búsqueda', error)
+        error: (error) => {
+          this.handleError('Error en búsqueda', error);
+          // No cargar los datos normales en caso de error para evitar confusión
+        }
       });
   }
 
@@ -347,7 +359,7 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   }
 
   toggleSearch(): void {
-    this.isSearchExpanded = !this.isSearchExpanded;
+     this.isSearchExpanded = !this.isSearchExpanded;
   }
 
   toggleUserMenu(): void {

@@ -117,11 +117,13 @@
             </table>
 
             <!-- Paginador -->
-            <mat-paginator [length]="totalStudents"
-                          [pageSize]="currentPageSize"
-                          [pageSizeOptions]="pageSizeOptions"
-                          [showFirstLastButtons]="true"
-                          (page)="onPageChange($event)">
+            <mat-paginator 
+              [length]="totalStudents"
+              [pageSize]="currentPageSize"
+              [pageSizeOptions]="pageSizeOptions"
+              [showFirstLastButtons]="true"
+              (page)="onPageChange($event)"
+              [pageIndex]="currentPageIndex">
             </mat-paginator>
           </div>
         </mat-tab>

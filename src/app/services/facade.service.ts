@@ -96,26 +96,53 @@ public validarLogin(email: string, passmatricula: string) {
   getStudents(page: number, pageSize: number, sortOptions?: SortOptions): Observable<{ results: StudentData[], count: number }> {
     let params = new HttpParams()
       .set('page', (page + 1).toString())
-      .set('page_size', pageSize.toString());
+      .set('size', pageSize.toString())
+      .set('pageSize', pageSize.toString())
+      .set('length', pageSize.toString());
 
     if (sortOptions?.active && sortOptions.direction) {
       params = params.set('ordering', `${sortOptions.direction === 'desc' ? '-' : ''}${sortOptions.active}`);
     }
 
-    // Ajusta la URL y el endpoint según tu backend
+    console.log('Enviando parámetros:', params.toString()); // Debug
+
     return this.http.get<any>(`${environment.url_api}/api/estudiantes/`, { params }).pipe(
-      map(response => ({
-        results: response.results.map((student: any) => ({
-          ...student,
-          matricula: student.matricula // asegura que la matrícula esté presente
-        })),
-        count: response.count
-      })),
+      map(response => {
+        if (response.results?.length !== pageSize) {
+          console.log(`Respuesta del servidor:`, response); // Debug completo
+        }
+        return {
+          results: response.results?.map((student: any) => ({
+            ...student,
+            matricula: student.matricula
+          })) || [],
+          count: response.count || 0
+        };
+      }),
       catchError(error => {
-        console.error('Error obteniendo estudiantes:', error);
-        return throwError(() => new Error('Error obteniendo estudiantes'));
+        console.error('Error detallado obteniendo estudiantes:', error);
+        return throwError(() => new Error(`Error obteniendo estudiantes: ${error.message}`));
       })
     );
+  }
+
+  searchStudents(searchTerm: string, page: number, pageSize: number): Observable<{ results: StudentData[], count: number }> {
+    let params = new HttpParams()
+      .set('search', searchTerm)
+      .set('page', (page + 1).toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get<any>(`${environment.url_api}/api/estudiantes/buscar/`, { params })
+      .pipe(
+        map(response => ({
+          results: response.results || [],
+          count: response.count || 0
+        })),
+        catchError(error => {
+          console.error('Error en búsqueda:', error);
+          return throwError(() => new Error('Error al realizar la búsqueda'));
+        })
+      );
   }
 
   // Nueva función para obtener un estudiante por matrícula
