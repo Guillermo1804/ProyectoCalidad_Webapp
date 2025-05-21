@@ -142,15 +142,7 @@ public validarLogin(email: string, passmatricula: string) {
   // Service for user registration
   registerUser(userData: UserRegistrationData): Observable<any> {
     console.log('Registering user with data:', userData);
-    // This is a mock API call. Replace with actual HTTP POST to your backend endpoint.
-    // Example: return this.http.post<any>(`${environment.url_api}/api/register/`, userData, httpOptions);
-    
-    // Simulate a successful registration after a short delay
-    return of({ success: true, message: 'User registered successfully' }).pipe(
-      // delay(1500) // You might need to import delay from 'rxjs/operators'
-    );
-    // To simulate an error:
-    // return throwError(() => new Error('Registration failed. Email already exists.'));
+    return this.http.post<any>(`${environment.url_api}/api/register/`, userData, httpOptions);
   }
 
   // Improved for asegurar que la matrícula esté presente y accesible
