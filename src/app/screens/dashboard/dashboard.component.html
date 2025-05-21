@@ -1,0 +1,64 @@
+<div class="dashboard-container">
+  <h2>Mi Dashboard</h2>
+
+  <div *ngIf="errorMessage" class="error-message-bar">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <div class="dashboard-sections">
+    <mat-card class="dashboard-section dashboard-vehicles">
+      <mat-card-header>
+        <mat-card-title>Vehículos Actualmente en Campus</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="loadingVehicles && !errorMessage" class="loading-spinner">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando vehículos...</p>
+        </div>
+        <div *ngIf="!loadingVehicles && vehiclesInCampus.length === 0 && !errorMessage" class="empty-state">
+          <mat-icon>info_outline</mat-icon>
+          <p>No tienes vehículos registrados en el campus actualmente.</p>
+        </div>
+        <mat-list *ngIf="!loadingVehicles && vehiclesInCampus.length > 0">
+          <mat-list-item *ngFor="let vehicle of vehiclesInCampus">
+            <mat-icon matListItemIcon>directions_car</mat-icon>
+            <div matListItemTitle><strong>Placa:</strong> {{ vehicle.placa }}</div>
+            <div matListItemLine><strong>Entrada:</strong> {{ vehicle.entry_time | date:'dd/MM/yyyy HH:mm' }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-divider class="dashboard-divider"></mat-divider>
+
+    <mat-card class="dashboard-section dashboard-history">
+      <mat-card-header>
+        <mat-card-title>Historial de Entradas y Salidas</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="loadingHistory && !errorMessage" class="loading-spinner">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando historial...</p>
+        </div>
+        <div *ngIf="!loadingHistory && movementHistory.length === 0 && !errorMessage" class="empty-state">
+          <mat-icon>info_outline</mat-icon>
+          <p>No hay historial de movimientos para mostrar.</p>
+        </div>
+        <mat-list *ngIf="!loadingHistory && movementHistory.length > 0">
+          <mat-list-item *ngFor="let item of movementHistory">
+            <mat-icon matListItemIcon>{{ item.exit_time ? 'exit_to_app' : 'directions_walk' }}</mat-icon>
+            <div matListItemTitle><strong>Placa:</strong> {{ item.placa }}</div>
+            <div matListItemLine>
+              <strong>Entrada:</strong> {{ item.entry_time | date:'dd/MM/yyyy HH:mm' }}
+              <span *ngIf="item.exit_time"> | <strong>Salida:</strong> {{ item.exit_time | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div matListItemLine *ngIf="item.exit_time">
+              <strong>Duración:</strong> {{ calculateDuration(item.entry_time, item.exit_time) }}
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

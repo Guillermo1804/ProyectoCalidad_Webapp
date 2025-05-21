@@ -15,21 +15,22 @@ body {
 }
 
 /* Contenedor principal */
-.login-container {
+.register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 20px;
   animation: fadeIn 1s ease-in-out;
 }
 
-/* Tarjeta de inicio de sesión */
-.login-card {
+/* Tarjeta de registro */
+.register-card {
   background: white;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  width: 350px;
+  width: 400px;
   text-align: center;
   animation: slideUp 0.8s ease-out;
 }
@@ -78,7 +79,7 @@ h2 {
   color: #003b5c;
 }
 
-/* Botón de inicio de sesión */
+/* Botón de registro */
 button {
   width: 100%;
   padding: 12px;
@@ -95,38 +96,41 @@ button:hover {
   background: #002a41;
 }
 
-/* Enlace de registro */
-.register-link {
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Enlace de inicio de sesión */
+.login-link {
   margin-top: 15px;
   font-size: 14px;
 }
 
-.register-link a {
-  color: #667eea;
+.login-link a {
+  color: #003b5c;
   text-decoration: none;
+  font-weight: bold;
 }
 
-.register-link a:hover {
+.login-link a:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
 }
 
 /* Animaciones */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

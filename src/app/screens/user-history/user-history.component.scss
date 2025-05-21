@@ -1,0 +1,58 @@
+.history-container {
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f5f5f5;
+  min-height: calc(100vh - 40px); // Ajustar si tienes header/footer
+}
+
+h1 {
+  color: #003b5c;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #003b5c;
+  padding-bottom: 10px;
+}
+
+.loading-indicator p,
+.empty-state p {
+  color: #555;
+  font-size: 16px;
+  text-align: center;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.history-list, .vehicle-list {
+  display: grid;
+  gap: 15px;
+}
+
+.history-item, .vehicle-item {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease-in-out;
+}
+
+.history-item:hover, .vehicle-item:hover {
+  transform: translateY(-5px);
+}
+
+.history-item p, .vehicle-item p {
+  margin: 5px 0;
+  color: #333;
+  font-size: 15px;
+}
+
+.history-item p strong, .vehicle-item p strong {
+  color: #003b5c;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .history-list, .vehicle-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}

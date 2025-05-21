@@ -1,0 +1,109 @@
+.dashboard-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.dashboard-section {
+  margin-bottom: 0 !important;
+  border: 1px solid #e0e0e0; // Added border for better separation
+  border-radius: 8px; // Rounded corners for cards
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); // Softer shadow for a modern look
+}
+
+.dashboard-divider {
+  margin: 24px 0;
+  border-top: 2px solid #003b5c;
+}
+
+@media (min-width: 900px) {
+  .dashboard-sections {
+    flex-direction: row;
+    gap: 40px;
+  }
+  .dashboard-section {
+    flex: 1 1 0;
+    min-width: 350px;
+    margin-bottom: 0; // Remove bottom margin for desktop view when sections are side-by-side
+  }
+  .dashboard-divider {
+    display: none;
+  }
+}
+.dashboard-container {
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9f9f9; // Lighter background for the container
+  min-height: calc(100vh - 40px);
+}
+
+h2 {
+  color: #003b5c;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #003b5c;
+  padding-bottom: 10px;
+  font-weight: 600; // Bolder title
+}
+
+.loading-spinner,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #fff; // White background for loading/empty states
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-top: 10px; // Add some space above these states
+}
+
+.loading-spinner p,
+.empty-state p {
+  color: #555;
+  font-size: 1rem; // Adjusted font size
+  text-align: center;
+  margin-top: 10px; // Space between icon/spinner and text
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mat-card.dashboard-section {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease-in-out;
+  margin-bottom: 20px;
+}
+
+.mat-card.dashboard-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1); // Enhanced shadow on hover
+}
+
+.mat-list-item div strong {
+  color: #003b5c;
+}
+
+.mat-list-item { // Style for list items
+  padding: 10px 0 !important; // Adjust padding
+}
+
+.mat-list-item .mat-icon { // Style for icons in list items
+  color: #003b5c; // Match icon color with theme
+}
+
+.error-message-bar {
+  background-color: #ffebee; // Light red background
+  color: #c62828; // Darker red text
+  padding: 10px 15px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #ef9a9a; // Red border
+}

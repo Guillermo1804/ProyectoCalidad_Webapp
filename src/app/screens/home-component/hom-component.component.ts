@@ -18,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list'; // Added import
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule } from '@angular/common';
@@ -25,6 +26,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { RouterModule } from '@angular/router';
 
 // Define VehicleRecord interface locally if not imported from anywhere else
 interface VehicleRecord {
@@ -51,11 +53,13 @@ interface VehicleRecord {
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    MatProgressSpinnerModule,
     MatSidenavModule,
+    MatListModule, // Added to imports
     MatDividerModule,
     MatFormFieldModule,
-    MatSnackBarModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    RouterModule
   ]
 })
 export class HomComponentComponent implements OnInit, AfterViewInit {

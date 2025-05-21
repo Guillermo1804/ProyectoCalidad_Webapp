@@ -3,17 +3,17 @@
     <h2>Iniciar sesión</h2>
     <form>
       <div class="input-group">
-        <input type="email" [(ngModel)]="email" class="form-control" id="email" placeholder="Correo electrónico" name="email">
+        <input type="email" [(ngModel)]="email" class="form-control" id="email" name="email">
         <div *ngIf="errors.email" class="invalid-feedback">{{ errors.email }}</div>
         <label for="email">Correo electrónico</label>
       </div>
       <div class="input-group">
-        <input type="matricula" [(ngModel)]="passmatricula" class="form-control" id="matricula" placeholder="Matrícula" name="matricula">
+        <input type="matricula" [(ngModel)]="passmatricula" class="form-control" id="matricula" name="matricula">
         <div *ngIf="errors.passmatricula" class="invalid-feedback">{{ errors.passmatricula }}</div>
         <label for="matricula">Matrícula</label>
       </div>
       <button type="submit" (click)="login()">Ingresar</button>
-      <p class="register-link">¿No tienes cuenta? <a href="#">Regístrate</a></p>
+      <p class="register-link">¿No tienes cuenta? <a href="/register">Regístrate</a></p>
     </form>
   </div>
 </div>

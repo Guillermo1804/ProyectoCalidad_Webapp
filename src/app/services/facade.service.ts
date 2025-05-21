@@ -4,13 +4,36 @@ import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpParams } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { throwError, Observable, of } from 'rxjs';
 // Make sure the path is correct; update if necessary
 import { ValidatorServiceService } from './tools/validator-service.service';
 import { ErrorServiceService } from './tools/error-service.service';
 import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs';
 import { SortOptions, StudentData } from './database.service';
+
+// Interfaces for user-specific vehicle data
+export interface VehicleMovementRecord {
+  id?: string;
+  placa: string;
+  entry_time: Date;
+  exit_time?: Date;
+  duration?: string;
+}
+
+export interface ActiveVehicle {
+  id?: string;
+  placa: string;
+  entry_time: Date;
+}
+
+// Interface for User Registration Data
+export interface UserRegistrationData {
+  username: string; // Will typically be the email or a generated username
+  email: string;
+  password: string;
+  first_name: string; // Corresponds to 'Nombre(s)'
+  last_name: string;  // Corresponds to 'Apellido Paterno Apellido Materno'
+}
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -92,7 +115,45 @@ public validarLogin(email: string, passmatricula: string) {
       return this.http.get<any>(`${environment.url_api}/me/`,{headers:headers});
     }
 
-  // Mejorada para asegurar que la matrícula esté presente y accesible
+  // Method to get user ID from cookie
+  getUserIdCookie(): string | null {
+    return this.cookieService.get(user_id_cookie_name);
+  }
+
+  // Method to get user's movement history (mock data)
+  getUserMovementHistory(userId: string): Observable<VehicleMovementRecord[]> {
+    console.log(`Fetching movement history for userId: ${userId}`); // Simulate API call
+    const mockHistory: VehicleMovementRecord[] = [
+      { id: 'hist1', placa: 'PBN1234', entry_time: new Date(Date.now() - 86400000 * 2), exit_time: new Date(Date.now() - 86400000 * 1.5), duration: '12h' },
+      { id: 'hist2', placa: 'XYZ7890', entry_time: new Date(Date.now() - 86400000 * 5), exit_time: new Date(Date.now() - 86400000 * 4), duration: '24h' },
+    ];
+    return of(mockHistory); // Return Observable of mock data
+  }
+
+  // Method to get user's active vehicles on campus (mock data)
+  getUserActiveVehicles(userId: string): Observable<ActiveVehicle[]> {
+    console.log(`Fetching active vehicles for userId: ${userId}`); // Simulate API call
+    const mockActiveVehicles: ActiveVehicle[] = [
+      { id: 'active1', placa: 'ABC123Z', entry_time: new Date(Date.now() - 3600000 * 3) }, // Entered 3 hours ago
+    ];
+    return of(mockActiveVehicles); // Return Observable of mock data
+  }
+
+  // Service for user registration
+  registerUser(userData: UserRegistrationData): Observable<any> {
+    console.log('Registering user with data:', userData);
+    // This is a mock API call. Replace with actual HTTP POST to your backend endpoint.
+    // Example: return this.http.post<any>(`${environment.url_api}/api/register/`, userData, httpOptions);
+    
+    // Simulate a successful registration after a short delay
+    return of({ success: true, message: 'User registered successfully' }).pipe(
+      // delay(1500) // You might need to import delay from 'rxjs/operators'
+    );
+    // To simulate an error:
+    // return throwError(() => new Error('Registration failed. Email already exists.'));
+  }
+
+  // Improved for asegurar que la matrícula esté presente y accesible
   getStudents(page: number, pageSize: number, sortOptions?: SortOptions): Observable<{ results: StudentData[], count: number }> {
     let params = new HttpParams()
       .set('page', (page + 1).toString())
