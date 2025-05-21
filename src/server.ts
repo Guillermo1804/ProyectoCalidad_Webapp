@@ -38,8 +38,15 @@ function run(): void {
 
   // Start up the Node server
   const server = app();
-  server.listen(port, () => {
+  const listener = server.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`);
+  });
+  // Handle port already in use to avoid crashes on hot reload
+  listener.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} already in use. Exiting.`);
+      process.exit(1);
+    }
   });
 }
 

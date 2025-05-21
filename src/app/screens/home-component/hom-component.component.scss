@@ -17,10 +17,67 @@ $spacing: 16px;
   justify-content: space-between;
   padding: $spacing;
   background-color: $primary-color;
-  color: #f0f0f0; // Changed to a lighter gray for better visibility
+  color: white; // General text color for the top bar
   flex-wrap: wrap;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+
+  // Ensure all mat-icon elements within top-bar are white
+  mat-icon {
+    color: white !important;
+  }
+
+  // Style the mat-form-field within the search container
+  .search-container {
+    mat-form-field {
+      // Style the label (e.g., "Buscar Persona")
+      // For Angular Material using MDC (Material Design Components)
+      ::ng-deep .mat-mdc-form-field-label {
+        color: rgba(255, 255, 255, 0.85) !important; // Light white for placeholder look
+      }
+      // For older Angular Material versions (pre-MDC)
+      .mat-form-field-label {
+        color: rgba(255, 255, 255, 0.85) !important; // Light white for placeholder look
+      }
+
+      // Style the input text
+      input.mat-input-element {
+        color: white !important;
+      }
+
+      // Style the form field outline
+      // For MDC components
+      ::ng-deep .mdc-notched-outline__leading,
+      ::ng-deep .mdc-notched-outline__notch,
+      ::ng-deep .mdc-notched-outline__trailing {
+        border-color: rgba(255, 255, 255, 0.7) !important; // Outline color
+      }
+      // For older (non-MDC) outline appearance
+      .mat-form-field-appearance-outline .mat-form-field-outline {
+        color: rgba(255, 255, 255, 0.7) !important; // This sets the color of the SVG path for the outline
+      }
+
+      // Focused state styling
+      &.mat-focused {
+        // Focused label
+        ::ng-deep .mat-mdc-form-field-label,
+        .mat-form-field-label {
+          color: white !important;
+        }
+
+        // Focused outline for MDC
+        ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
+        ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
+        ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
+          border-color: white !important;
+        }
+        // Focused outline for non-MDC
+        .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+          color: white !important;
+        }
+      }
+    }
+  }
 }
 
 .menu-button {
@@ -109,8 +166,68 @@ $spacing: 16px;
 
   table {
     width: 100%;
-    min-width: 600px;
+    min-width: 0;
+    @media (max-width: 600px) {
+      min-width: unset;
+    }
   }
+/* === Responsive tabla de usuarios tipo "card" en móviles === */
+@media (max-width: 600px) {
+  .table-container {
+    table.mat-table,
+    table {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+    .mat-header-row, .mat-row {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 8px;
+    }
+    .mat-header-cell, .mat-cell {
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
+      align-items: center;
+      padding: 8px 4px;
+      font-size: 0.95em;
+    }
+    .mat-header-cell {
+      font-weight: bold;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+    }
+    .mat-cell {
+      position: relative;
+      padding-left: 40%;
+      min-height: 32px;
+      border-bottom: none;
+    }
+    .mat-cell:before {
+      content: attr(data-label);
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      width: 38%;
+      font-weight: bold;
+      color: #666;
+      white-space: pre-line;
+      font-size: 0.93em;
+    }
+    .mat-header-row {
+      display: none;
+    }
+    .no-data-row, .no-data-message {
+      display: block;
+      text-align: center;
+      font-size: 0.95em;
+      padding: 12px 0;
+    }
+  }
+}
 
   .sort-indicator {
     margin-bottom: 8px;
@@ -202,25 +319,13 @@ mat-paginator {
 /* === Responsive: móvil === */
 @media (max-width: 768px) {
   .top-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
     font-size: 1.1em;
-    padding: 10px 6px;
+    padding: 8px 10px; /* Adjusted padding for consistent height */
+    flex-wrap: nowrap; /* Prevent wrapping to maintain single line */
   }
 
   .main-content {
     padding: 8px;
-  }
-
-  .search-container {
-    width: 100%;
-    flex-direction: column;
-
-    mat-form-field,
-    .search-toggle {
-      width: 100%;
-    }
   }
 
   .info-grid {
@@ -234,23 +339,6 @@ mat-paginator {
 
 /* === Responsive adjustments === */
 @media (max-width: 600px) {
-  .top-bar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .search-container {
-    width: 100%;
-    margin-top: $spacing;
-  }
-
-  .user-section {
-    margin-left: 0;
-    margin-top: $spacing;
-    width: 100%;
-    justify-content: flex-end;
-  }
-
   .info-grid {
     .info-item {
       flex-basis: 100%; // Ensure items take full width on small screens
@@ -264,6 +352,210 @@ mat-paginator {
     button {
       margin-top: $spacing; // Add space above button on small screens
     }
+  }
+}
+
+/* Estilos responsivos */
+/* This is the second @media (max-width: 768px) block that was merged/edited previously */
+@media (max-width: 768px) {
+  .top-bar {
+    /* padding: 0 8px; // This specific padding rule is removed, consolidated with the first 768px block. */
+    /* The nested .search-container rule (width: calc(100% - 120px)) is removed. */
+
+    .user-section { // This existing rule for user-menu positioning is kept
+      .user-menu {
+        right: 8px;
+      }
+    }
+  }
+
+  .main-content {
+    padding: 8px; // Reducir padding general del contenido
+  }
+
+  .table-container {
+    overflow-x: auto; // Permitir scroll horizontal en tablas pequeñas
+  }
+
+  mat-card {
+    margin-bottom: 8px; // Espacio entre cards
+  }
+
+  .entry-form {
+    flex-direction: column; // Apilar elementos del formulario en móviles
+
+    mat-form-field {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr; // Una sola columna para la info del estudiante
+  }
+
+  .side-nav {
+    width: 250px; // Ancho del sidenav en móviles
+  }
+
+  .loading-overlay p {
+    font-size: 0.9rem; // Ajustar tamaño de fuente del mensaje de carga
+  }
+
+  .no-data-message {
+    font-size: 0.9rem; // Ajustar tamaño de fuente del mensaje sin datos
+    padding: 16px;
+  }
+
+  .sort-indicator {
+    font-size: 0.8rem; // Ajustar tamaño de fuente del indicador de ordenamiento
+    padding: 4px 8px;
+  }
+
+  .mat-paginator {
+    font-size: 0.9rem; // Ajustar tamaño de fuente del paginador
+  }
+
+  .student-info mat-card-title {
+    font-size: 1.1rem; // Ajustar tamaño de título en card de estudiante
+  }
+
+  .vehicle-section h3 {
+    font-size: 1.1rem; // Ajustar tamaño de subtítulos en sección vehicular
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar {
+    .search-container {
+      // Ocultar la barra de búsqueda inicialmente en pantallas muy pequeñas,
+      // se expande al hacer clic en el icono.
+      mat-form-field:not(.expanded) {
+        width: 0;
+        visibility: hidden;
+        transition: width 0.3s ease, visibility 0.3s ease;
+      }
+      mat-form-field.expanded {
+        width: calc(100% - 50px); // Ancho cuando está expandida
+        visibility: visible;
+      }
+      .search-toggle {
+        margin-left: 4px;
+      }
+    }
+    .menu-button {
+      margin-right: 4px;
+    }
+  }
+
+  .user-section .user-name, .user-section .user-email {
+    font-size: 0.85rem; // Reducir fuente en menú de usuario
+  }
+
+  .mat-tab-label {
+    font-size: 0.85rem; // Reducir tamaño de etiquetas de pestañas
+    padding: 0 12px;
+  }
+
+  .back-button {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  // Ajustes para tablas en móviles
+  .mat-table {
+    font-size: 0.85rem;
+
+    .mat-header-cell, .mat-cell {
+      padding: 8px; // Reducir padding de celdas
+    }
+
+    .mat-column-actions .mat-icon-button { // Botones de acción más pequeños
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      mat-icon {
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+    }
+  }
+  .clickable-row:hover {
+    background-color: rgba(0, 0, 0, 0.03); // Feedback visual más sutil
+  }
+}
+
+// Ajustes generales para mejorar la apariencia en móviles
+.sidenav-container {
+  height: 100%; // Asegurar que el contenedor ocupe toda la altura
+}
+
+.side-nav-content {
+  padding: 16px;
+  p {
+    margin-top: 0;
+    font-weight: bold;
+  }
+  button mat-icon {
+    margin-right: 8px;
+  }
+}
+
+.main-tabs .mat-tab-body-content {
+  padding-top: 16px; // Añadir un poco de espacio arriba del contenido de las pestañas
+}
+
+// Mejorar el botón de cerrar sesión en el menú de usuario
+.user-menu .logout-button {
+  width: 100%;
+  justify-content: flex-start; // Alinear texto e icono a la izquierda
+  padding: 8px 16px;
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+// Estilo para el botón de menú cuando el sidenav está abierto
+.menu-button[aria-expanded="true"] {
+  background-color: rgba(0,0,0,0.04); // Un ligero feedback visual
+}
+
+// Asegurar que el overlay de carga sea visible y centrado
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; // Asegurar que esté por encima de otros elementos
+  p {
+    margin-top: 16px;
+    font-weight: 500;
+  }
+}
+
+// Ajustes para el paginador en pantallas pequeñas
+.mat-paginator {
+  display: flex;
+  flex-wrap: wrap; // Permitir que los elementos del paginador se envuelvan
+  justify-content: center;
+  .mat-paginator-range-label {
+    margin: 0 8px !important; // Ajustar márgenes
   }
 }
 
