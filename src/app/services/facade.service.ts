@@ -176,7 +176,7 @@ saveUserData(user_data: any) {
           console.log('Respuesta activos:', response); // Debug
           const vehiculos = response?.vehiculos || [];
           return vehiculos.map((vehiculo: any) => ({
-            id: vehiculo.id,
+            id: vehiculo.id || vehiculo.placas, // Usar placas como ID alternativo
             placa: vehiculo.placas,
             entry_time: vehiculo.entrada || new Date().toISOString() // Si entrada está vacío, usar fecha actual
           }));
@@ -193,13 +193,15 @@ saveUserData(user_data: any) {
         `${environment.url_api}/api/vehiculos/historial/${matricula}/`
       ).pipe(
         map(response => {
-          console.log('Respuesta historial:', response); // Debug
-          const records = response?.results || response || [];
-          return Array.isArray(records) ? records.map(record => ({
-            ...record,
-            entry_time: new Date(record.entry_time),
-            exit_time: record.exit_time ? new Date(record.exit_time) : undefined
-          })) : [];
+          console.log('Respuesta historial:', response);
+          const historial = response?.historial || [];
+          return historial.map((vehiculo: any) => ({
+            id: vehiculo.id,
+            placa: vehiculo.placas,
+            entry_time: vehiculo.entrada || new Date().toISOString(),
+            exit_time: vehiculo.acciones === 'inactivo' ? new Date().toISOString() : undefined,
+            duration: vehiculo.acciones === 'inactivo' ? 'Finalizado' : 'Activo'
+          }));
         }),
         catchError(error => {
           console.error('Error obteniendo historial:', error);
@@ -229,18 +231,37 @@ registerVehicleEntry(matricula: string, placa: string): Observable<any> {
   );
 }
 
+    // Reemplazar la función registerVehicleExit existente con esta versión
     registerVehicleExit(recordId: string): Observable<any> {
+      if (!recordId) {
+        return throwError(() => new Error('ID de registro no válido'));
+      }
+
+      const data = {
+        placa: recordId  // Cambiar a usar la placa en lugar del ID
+      };
+
+      console.log('Enviando salida para vehículo:', data); // Debug
+
       return this.http.post<any>(
-        `${environment.url_api}/api/vehiculos/salida/${recordId}/`,
-        {}
+        `${environment.url_api}/api/vehiculos/salida/`,
+        data,
+        httpOptions
       ).pipe(
         map(response => {
-          console.log('Respuesta salida:', response); // Debug
+          console.log('Respuesta salida:', response);
+          if (!response) {
+            throw new Error('No se recibió respuesta del servidor');
+          }
           return response;
         }),
         catchError(error => {
-          console.error('Error registrando salida:', error);
-          return throwError(() => new Error(error.error?.message || 'Error al registrar la salida del vehículo'));
+          console.error('Error detallado:', error);
+          const errorMessage = error.error?.detail || 
+                             error.error?.message || 
+                             error.message || 
+                             'Error al registrar la salida del vehículo';
+          return throwError(() => new Error(errorMessage));
         })
       );
     }

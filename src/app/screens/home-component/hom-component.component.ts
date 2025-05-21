@@ -4,7 +4,7 @@ import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { DatabaseService, StudentData, SortOptions } from '../../services/database.service';
 import { FacadeServiceService } from '../../services/facade.service';
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -267,23 +267,40 @@ export class HomComponentComponent implements OnInit, AfterViewInit {
   }
 
   registerVehicleExit(record: VehicleRecord): void {
-    if (!record.id) return;
+    if (!record.placa) {
+      this.showSnackBar('Error: Datos del vehículo incompletos');
+      return;
+    }
 
     this.detailsLoading = true;
-    // Cambia a usar facadeService para registrar la salida del vehículo
-    this.facadeService.registerVehicleExit(record.id)
+    
+    // Primero obtener los vehículos activos para encontrar el ID correcto
+    this.facadeService.getActiveRecords(this.selectedStudent?.matricula || '')
       .pipe(
+        map(records => records.find(r => r.placa === record.placa)),
         finalize(() => {
           this.detailsLoading = false;
           this.cdr.detectChanges();
         })
       )
       .subscribe({
-        next: () => {
-          this.loadVehicleRecords();
-          this.showSnackBar('Salida registrada exitosamente');
+        next: (activeRecord) => {
+          if (!activeRecord?.id) {
+            this.showSnackBar('Error: No se encontró el registro del vehículo');
+            return;
+          }
+          
+          // Ahora sí registrar la salida con el ID correcto
+          this.facadeService.registerVehicleExit(activeRecord.id)
+            .subscribe({
+              next: () => {
+                this.loadVehicleRecords();
+                this.showSnackBar('Salida registrada exitosamente');
+              },
+              error: (error) => this.handleError('Error registrando salida', error)
+            });
         },
-        error: (error) => this.handleError('Error registrando salida', error)
+        error: (error) => this.handleError('Error buscando vehículo activo', error)
       });
   }
 
