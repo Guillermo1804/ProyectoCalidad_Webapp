@@ -25,58 +25,109 @@ $spacing: 16px;
   // Ensure all mat-icon elements within top-bar are white
   mat-icon {
     color: white !important;
+    transition: color 0.2s;
+  }
+
+  // Hover y focus para iconos de la barra de navegación
+  button.mat-icon-button:focus mat-icon,
+  button.mat-icon-button:hover mat-icon,
+  .user-section button:focus mat-icon,
+  .user-section button:hover mat-icon {
+    color: #4fc3f7 !important;
+    outline: none;
   }
 
   // Style the mat-form-field within the search container
   .search-container {
     mat-form-field {
-      // Style the label (e.g., "Buscar Persona")
-      // For Angular Material using MDC (Material Design Components)
-      ::ng-deep .mat-mdc-form-field-label {
-        color: rgba(255, 255, 255, 0.85) !important; // Light white for placeholder look
-      }
-      // For older Angular Material versions (pre-MDC)
-      .mat-form-field-label {
-        color: rgba(255, 255, 255, 0.85) !important; // Light white for placeholder look
-      }
-
-      // Style the input text
-      input.mat-input-element {
-        color: white !important;
+      // Forzar color del label y placeholder con máxima especificidad
+      ::ng-deep .mat-mdc-form-field-label,
+      .mat-form-field-label,
+      ::ng-deep label,
+      label {
+        color: #fff !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        opacity: 1 !important;
       }
 
-      // Style the form field outline
-      // For MDC components
+      // Forzar color del input con máxima especificidad
+      ::ng-deep input.mat-input-element,
+      input.mat-input-element,
+      ::ng-deep input,
+      input {
+        color: #fff !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        opacity: 1 !important;
+        caret-color: #ffe082 !important;
+      }
+
+      // Color del placeholder (todas variantes)
+      ::ng-deep input::placeholder,
+      input::placeholder,
+      ::ng-deep input::-webkit-input-placeholder,
+      input::-webkit-input-placeholder,
+      ::ng-deep input::-moz-placeholder,
+      input::-moz-placeholder,
+      ::ng-deep input:-ms-input-placeholder,
+      input:-ms-input-placeholder {
+        color: #fff !important;
+        opacity: 0.8 !important;
+      }
+
+      // Outline
       ::ng-deep .mdc-notched-outline__leading,
       ::ng-deep .mdc-notched-outline__notch,
-      ::ng-deep .mdc-notched-outline__trailing {
-        border-color: rgba(255, 255, 255, 0.7) !important; // Outline color
-      }
-      // For older (non-MDC) outline appearance
+      ::ng-deep .mdc-notched-outline__trailing,
       .mat-form-field-appearance-outline .mat-form-field-outline {
-        color: rgba(255, 255, 255, 0.7) !important; // This sets the color of the SVG path for the outline
+        border-color: #fff !important;
       }
 
       // Focused state styling
       &.mat-focused {
-        // Focused label
         ::ng-deep .mat-mdc-form-field-label,
-        .mat-form-field-label {
-          color: white !important;
+        .mat-form-field-label,
+        ::ng-deep label,
+        label {
+          color: #ffe082 !important;
         }
-
-        // Focused outline for MDC
         ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
         ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
-        ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
-          border-color: white !important;
-        }
-        // Focused outline for non-MDC
+        ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing,
         .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
-          color: white !important;
+          border-color: #ffe082 !important;
+        }
+      }
+
+      // Hover state para el input
+      &:hover {
+        $hover-blue: #4fc3f7;
+        ::ng-deep .mat-mdc-form-field-label,
+        .mat-form-field-label,
+        ::ng-deep label,
+        label {
+          color: $hover-blue !important;
+        }
+        ::ng-deep input.mat-input-element,
+        input.mat-input-element,
+        ::ng-deep input,
+        input {
+          color: $hover-blue !important;
+        }
+        ::ng-deep .mdc-notched-outline__leading,
+        ::ng-deep .mdc-notched-outline__notch,
+        ::ng-deep .mdc-notched-outline__trailing,
+        .mat-form-field-appearance-outline .mat-form-field-outline {
+          border-color: $hover-blue !important;
         }
       }
     }
+// Estado destacado para mayor visibilidad en fondo oscuro
+// Estado destacado para mayor visibilidad en fondo oscuro
+.sort-indicator {
+  color: #ffe082 !important; // Amarillo claro para destacar sobre fondo oscuro
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
   }
 }
 
